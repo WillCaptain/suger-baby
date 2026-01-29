@@ -13,7 +13,7 @@
 
 | Scenario ID | Description | Status | Owner | Phase |
 | ----------- | ----------- | ------ | ----- | ----- |
-| SCN-001 | 访客快速体验与转正 | Draft | hangxiao | 第一阶段（2周） |
+| SCN-001 | 访客快速体验 | **In Progress** | hangxiao | 第一阶段（2周） |
 | SCN-002 | 血糖记录与展示 | Draft | **Will** | 第一阶段（2周） |
 | SCN-003 | 个人信息与病例管理 | Draft | hangxiao | 第一阶段（2周） |
 | SCN-004 | 数字人智能对话与引导 | Draft | hangxiao | 第二阶段（3周） |
@@ -43,8 +43,9 @@
 
 ---
 
-**Last Updated**: 2026-01-29 21:15  
+**Last Updated**: 2026-01-29 21:35  
 **Updated By**: hangxiao  
 **Total Scenarios**: 9 (全部为 P0 优先级)  
 **Total Features**: 3 (SCN-001 已简化，FTR-001 活跃，FTR-002/003 延期到 P1)  
-**Active Assignees**: hangxiao (8 scenarios, 1 active feature), Will (1 scenario)
+**Active Assignees**: hangxiao (8 scenarios, 1 active feature), Will (1 scenario)  
+**Git Status**: ✅ 已同步到远程仓库 (commit: a98f8dd)
