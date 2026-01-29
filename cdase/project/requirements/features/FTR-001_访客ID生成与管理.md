@@ -12,10 +12,12 @@
 - Steward: hangxiao
 - Group/Module: User/GuestManagement
 - Priority: P0
-- Version: v0.2
-- Last Updated: 2026-01-29 21:10
-- Resolution Status: Draft
-- Change Log: v0.2 - 简化功能，移除令牌管理，仅保留访客ID生成
+- Version: v0.3
+- Last Updated: 2026-01-29 21:50
+- Resolution Status: Design Complete
+- Change Log: 
+  - v0.3 - 完成 Design 阶段：创建 Function 文档、序列图、类图
+  - v0.2 - 简化功能，移除令牌管理，仅保留访客ID生成
 - Depends On: 
   - 无外部依赖（这是系统的入口功能）
 
@@ -44,7 +46,7 @@
 | Stage        | Status       | Owner        | Assigned At        | Last Updated       | Completed At       | Blocked Reason |
 |--------------|--------------|--------------|--------------------|--------------------|--------------------|----------------|
 | Requirement  | Done         | hangxiao     | 2026-01-29 19:45   | 2026-01-29 19:50   | 2026-01-29 19:50   | -              |
-| Design       | NotStarted   | -            | -                  | -                  | -                  | -              |
+| Design       | Done         | hangxiao     | 2026-01-29 21:40   | 2026-01-29 21:50   | 2026-01-29 21:50   | -              |
 | Development  | NotStarted   | -            | -                  | -                  | -                  | -              |
 | Test         | NotStarted   | -            | -                  | -                  | -                  | -              |
 | Acceptance   | NotStarted   | -            | -                  | -                  | -                  | -              |
@@ -96,9 +98,9 @@
 - [x] FACs are testable and numbered - 5 个 FACs 已编号（已更新）
 
 ### Design Gate
-- [ ] Sequence diagram covers all steps
-- [ ] Class/package diagram exists (if needed)
-- [ ] All Functions have frozen API/SPI
+- [x] Sequence diagram covers all steps - `/cdase/project/design/uml/FTR-001.sequence.puml`
+- [x] Class/package diagram exists (if needed) - `/cdase/project/design/uml/FTR-001.class.puml`
+- [x] All Functions have frozen API/SPI - FUN-001 和 FUN-002 已冻结
 
 ### Development Gate
 - [ ] Each Function has contract tests indexed

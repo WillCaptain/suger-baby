@@ -29,7 +29,7 @@
 
 | Feature ID | Description | Status | Owner | Path |
 | ----------- | ----------- | ------ | ----- | ------ |
-| FTR-001 | 访客ID生成与管理 | Draft | hangxiao | [features/FTR-001_访客ID生成与管理.md](features/FTR-001_访客ID生成与管理.md) |
+| FTR-001 | 访客ID生成与管理 | **Design Complete** | hangxiao | [features/FTR-001_访客ID生成与管理.md](features/FTR-001_访客ID生成与管理.md) |
 | FTR-002 | 访客转正与数据迁移 | **Deferred (P1)** | hangxiao | [features/FTR-002_访客转正与数据迁移.md](features/FTR-002_访客转正与数据迁移.md) |
 | FTR-003 | 隐私协议管理 | **Deferred (P1)** | hangxiao | [features/FTR-003_隐私协议管理.md](features/FTR-003_隐私协议管理.md) |
 
@@ -37,15 +37,17 @@
 
 ## Functions
 
-| Function ID | Description | Status | Owner |
-| ----------- | ----------- | ------ | ----- |
-| _(暂无函数)_ | - | - | - |
+| Function ID | Description | Status | Owner | Path |
+| ----------- | ----------- | ------ | ----- | ----- |
+| FUN-001 | 检测访客ID存在性 | Design Complete | hangxiao | [functions/FUN-001_检测访客ID存在性.md](functions/FUN-001_检测访客ID存在性.md) |
+| FUN-002 | 生成访客ID | Design Complete | hangxiao | [functions/FUN-002_生成访客ID.md](functions/FUN-002_生成访客ID.md) |
 
 ---
 
-**Last Updated**: 2026-01-29 21:35  
+**Last Updated**: 2026-01-29 21:50  
 **Updated By**: hangxiao  
 **Total Scenarios**: 9 (全部为 P0 优先级)  
-**Total Features**: 3 (SCN-001 已简化，FTR-001 活跃，FTR-002/003 延期到 P1)  
-**Active Assignees**: hangxiao (8 scenarios, 1 active feature), Will (1 scenario)  
-**Git Status**: ✅ 已同步到远程仓库 (commit: a98f8dd)
+**Total Features**: 3 (FTR-001 Design Complete, FTR-002/003 延期到 P1)  
+**Total Functions**: 2 (FUN-001, FUN-002 已完成设计)  
+**Active Assignees**: hangxiao (8 scenarios, 1 feature, 2 functions), Will (1 scenario)  
+**Git Status**: ✅ 已同步到远程仓库 (commit: 0f38596)

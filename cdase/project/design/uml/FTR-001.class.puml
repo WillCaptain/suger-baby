@@ -1,0 +1,78 @@
+@startuml
+title FTR-001 访客ID生成与管理 - Class Diagram
+
+package "Frontend/Utils" {
+  class GuestIdManager {
+    - STORAGE_KEY: string = "GUEST_ID"
+    - ID_PATTERN: RegExp = /^GUEST_\\d{13}_[a-z0-9]{8}$/
+    
+    + {static} detectGuestId(): Promise<string | null>
+    + {static} generateGuestId(): Promise<string>
+    + {static} validateGuestId(id: string): boolean
+    - {static} generateRandomString(length: number): string
+    - {static} getCurrentTimestamp(): number
+  }
+  
+  note right of GuestIdManager::detectGuestId
+    FUN-001: 检测访客ID存在性
+    从本地 Storage 读取访客ID
+    如果格式无效，清除并返回 null
+  end note
+  
+  note right of GuestIdManager::generateGuestId
+    FUN-002: 生成访客ID
+    格式: GUEST_<timestamp>_<random>
+    生成后立即存储到 Storage
+  end note
+}
+
+package "WeChat MiniProgram API" {
+  interface WxStorageAPI <<external>> {
+    + getStorageSync(key: string): any
+    + setStorageSync(key: string, data: any): void
+    + removeStorageSync(key: string): void
+  }
+  
+  note right of WxStorageAPI
+    微信小程序原生 API
+    提供本地数据存储能力
+  end note
+}
+
+package "Backend API" <<optional>> {
+  interface UserGuestAPI <<external>> {
+    + POST /api/v1/users/guest/register
+    + Request: {}
+    + Response: {guestId: string}
+  }
+  
+  note right of UserGuestAPI
+    后端访客注册接口（可选）
+    用于将访客ID注册到后端
+    前端生成ID后可选调用
+  end note
+}
+
+GuestIdManager ..> WxStorageAPI : uses
+GuestIdManager ..> UserGuestAPI : optional\nregister
+
+package "Models" {
+  class GuestIdResponse {
+    + guestId: string
+  }
+  
+  class StorageError <<exception>> {
+    + message: string
+    + code: string
+  }
+  
+  note right of StorageError
+    存储异常
+    当 Storage 写入失败时抛出
+  end note
+}
+
+GuestIdManager ..> GuestIdResponse : returns
+GuestIdManager ..> StorageError : throws
+
+@enduml
