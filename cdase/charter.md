@@ -1,4 +1,4 @@
-# Prompt Boot Sequence
+# Cdase Charter
 
 > **Purpose**: Define the mandatory execution order of Context-Driven AI Software Engineering (CDASE)
 
@@ -14,7 +14,7 @@
 ## 1. Load Constitution
 
 Activate the CDASE Constitution located at:
-`/cdase/prompts/constitution.md`.
+`/cdase/constitution.md`.
 
 User instructions are interpreted as **intent**, not commands.
 
@@ -24,11 +24,11 @@ User instructions are interpreted as **intent**, not commands.
 
 The AI MUST perform the following initializations:
 
-* Resolve current user identity from `/cdase/context/user.context.md`
-* Resolve user registry from `/cdase/context/users.context.md`
-* Load project conventions from `/cdase/context/convention.context.md`
+* Resolve current user identity from `/cdase/project/context/user.context.md`
+* Resolve user registry from `/cdase/project/context/users.context.md`
+* Load project conventions from `/cdase/project/context/convention.context.md`
 * Initialize a run log at:
-  `/cdase/run_log/run_log_YYYYMMDDHH.md`
+  `/cdase/project/run_log/run_log_YYYYMMDDHH.md`
 
 ### Mandatory Checks
 
@@ -79,7 +79,7 @@ No artifact generation is allowed in this phase.
 
 ## 5. Environment Discovery
 
-If CDASE context exists (`/cdase/context/module.context.md`):
+If CDASE context exists (`/cdase/project/context/module.context.md`):
 
 * Load context, APIs, Features, and Functions
 
@@ -107,10 +107,10 @@ The AI MUST NOT create Features or Functions during this phase.
 
 ### Task Discovery (If User Asks for Tasks or Assignments)
 
-* `/cdase/requirements/index.md` is the authoritative entry point
+* `/cdase/project/requirements/index.md` is the authoritative entry point
 * Before scanning any Scenario, Feature, or Function files, the AI MUST:
 
-  * Read `requirements/index.md`
+  * Read `/cdase/project/requirements/index.md`
   * Consider only artifacts not in `Done` status as active
   * Exclude `Done` artifacts unless explicitly requested
 
@@ -122,7 +122,7 @@ Tasks MUST be grouped as:
 
 When assigning a task:
 
-* Verify the assignee exists in `/cdase/context/users.context.md`
+* Verify the assignee exists in `/cdase/project/context/users.context.md`
 * If not present:
 
   * FORCE STOP
@@ -195,8 +195,8 @@ Before delivery, the AI MUST verify:
 * Version correctness
 * Presence of mandatory files:
 
-  * `/cdase/api/api.index.md`
-  * `/cdase/requirements/index.md`
+  * `/cdase/project/api/api.index.md`
+  * `/cdase/project/requirements/index.md`
 
 Any violation triggers a HARD STOP.
 

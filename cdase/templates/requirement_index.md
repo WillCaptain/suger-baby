@@ -7,17 +7,23 @@ Only artifacts not in `Done` status are considered active tasks.
 ---
 
 ## Scenarios
-- SCN-001 | InProgress
-- SCN-002 | Done
+| Scenario ID | Description | Status | Owner |
+| ----------- | ----------- | ------ | ----- |
+| SCN-001 | one sentence description | InProgress | Will |
+| SCN-002 | one sentence description | Done | Elsa |
 
 ---
 
 ## Features
-- FTR-001 | Done | Owner: alice
-- FTR-002 | InProgress | Owner: bob
+| Feature ID | Description | Status | Owner |
+| ----------- | ----------- | ------ | ----- |
+| FTR-001 | one sentence description | InProgress | Will |
+| FTR-002 | one sentence description | Done | Elsa |
 
 ---
 
 ## Functions
-- FUN-001 | Done
-- FUN-002 | NotStarted
+| Function ID | Description | Status | Owner |
+| ----------- | ----------- | ------ | ----- |
+| FUN-001 | one sentence description | InProgress | Will |
+| FUN-002 | one sentence description | Done | Elsa |

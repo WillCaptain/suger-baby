@@ -17,7 +17,7 @@
 - Last Updated: <YYYY-MM-DD>
 - Depends On: 
   - Only APIs defined outside the current Function scope.
-  - Each dependency MUST be an explicit API address (e.g., package.Class.method) suitable for direct code reference.
+  - Each dependency **MUST** be an explicit invokeable API address listed in `/api/modules`.
   - Belong Function/Feature Id followed the API address.
   - **VERY IMPORTANT: Self-dependencies (direct or indirect) are strictly forbidden.**
 

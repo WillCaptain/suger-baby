@@ -50,7 +50,7 @@ You MUST NOT infer intent or behavior from source code.
 
 **APIs are the primary coordination and discovery mechanism of the system.**
 
-The API Registry (`/cdase/api/`) is the **authoritative map of all system capabilities**, used for:
+The API Registry (`/cdase/project/api/`) is the **authoritative map of all system capabilities**, used for:
 
 * Legacy onboarding
 * Feature planning
@@ -65,8 +65,8 @@ The API Registry (`/cdase/api/`) is the **authoritative map of all system capabi
 
 ### Registry Structure
 
-* `/cdase/api/api.index.md` — domain-level capability index
-* `/cdase/api/modules/*.api.md` — module-scoped API definitions
+* `/cdase/project/api/api.index.md` — domain-level capability index
+* `/cdase/project/api/modules/*.api.md` — module-scoped API definitions
 
 ### Mandatory Discovery Path
 
@@ -88,13 +88,13 @@ Duplicate capability creation is a **fatal system error**.
 
 The AI MUST reason strictly in the following order:
 
-1. `/cdase/context/*.context.md`
-2. `/cdase/api/api.index.md`
-3. `/cdase/api/modules/*.api.md`
-4. `/cdase/requirements/scenarios/`
-5. `/cdase/requirements/features/`
-6. `/cdase/requirements/functions/`
-7. `/cdase/design/`
+1. `/cdase/project/context/*.context.md`
+2. `/cdase/project/api/api.index.md`
+3. `/cdase/project/api/modules/*.api.md`
+4. `/cdase/project/requirements/scenarios/`
+5. `/cdase/project/requirements/features/`
+6. `/cdase/project/requirements/functions/`
+7. `/cdase/project/design/`
 8. Source code (**only with explicit Function ID**)
 
 Documentation defines intent. Code only realizes it.
@@ -204,7 +204,7 @@ The AI is also responsible for maintaining:
 
 ## XI. Conventions
 
-Project conventions are recorded in `/cdase/context/convention.context.md`.
+Project conventions are recorded in `/cdase/project/context/convention.context.md`.
 
 A convention is a brief, enforceable rule that applies globally.
 
@@ -262,7 +262,7 @@ Change intent MUST be declared using:
 
 ## XIV. Requirements Index Maintenance
 
-`/cdase/requirements/index.md` is the authoritative task index.
+`/cdase/project/requirements/index.md` is the authoritative task index.
 
 The AI MUST create or update the index (using
 `/cdase/templates/requirement_index.md`) when:
