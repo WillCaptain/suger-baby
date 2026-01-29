@@ -10,3 +10,6 @@ Thumbs.db
 
 # Logs
 *.log
+
+# CDASE User Identity (Privacy Protection)
+cdase/project/context/user.context.md
