@@ -21,25 +21,27 @@
 
 ## 2. API / Method
 
-### Android 客户端方法（Kotlin）
-- `GuestIdManager.detectGuestId(context: Context): String?`
-  - **Description**: 从 SharedPreferences 读取访客ID
+### KMM 共享模块方法（Kotlin Multiplatform）
+- `GuestIdManager.detectGuestId(localStorage: LocalStorage): String?`
+  - **Description**: 从本地存储读取访客ID（跨平台）
   - **Params**: 
-    - `context: Context` - Android 上下文对象
+    - `localStorage: LocalStorage` - 本地存储抽象接口（Android: SharedPreferences, iOS: UserDefaults）
   - **Returns**: 
     - `String?`: 访客ID（格式：`GUEST_<timestamp>_<random>`），如果不存在则返回 null
   - **Throws**: 无（读取失败返回 null）
 
 ### 存储键
 - **Storage Key**: `GUEST_ID`
-- **存储位置**: SharedPreferences (`tangxiaonuan_prefs`)
+- **存储位置**: 
+  - Android: SharedPreferences (`twelfth_prefs`)
+  - iOS: UserDefaults (未来)
 
 ## 3. Acceptance Criteria (Testable Contract)
 
-- **AC-01**: Given SharedPreferences 中存在键 `GUEST_ID`，When 调用 `detectGuestId(context)`，Then 返回该访客ID字符串
-- **AC-02**: Given SharedPreferences 中不存在键 `GUEST_ID`，When 调用 `detectGuestId(context)`，Then 返回 `null`
-- **AC-03**: Given SharedPreferences 中访客ID格式无效（不符合 `GUEST_*` 模式），When 调用 `detectGuestId(context)`，Then 返回 `null` 并清除无效数据
-- **AC-04**: Given 读取 SharedPreferences 发生异常，When 调用 `detectGuestId(context)`，Then 返回 `null` 并记录错误日志
+- **AC-01**: Given 本地存储中存在键 `GUEST_ID`，When 调用 `detectGuestId(localStorage)`，Then 返回该访客ID字符串
+- **AC-02**: Given 本地存储中不存在键 `GUEST_ID`，When 调用 `detectGuestId(localStorage)`，Then 返回 `null`
+- **AC-03**: Given 本地存储中访客ID格式无效（不符合 `GUEST_*` 模式），When 调用 `detectGuestId(localStorage)`，Then 返回 `null` 并清除无效数据
+- **AC-04**: Given 读取本地存储发生异常，When 调用 `detectGuestId(localStorage)`，Then 返回 `null` 并记录错误日志
 
 ## 4. Error Handling & Edge Cases
 
@@ -88,8 +90,10 @@
 
 - Feature: `/cdase/project/requirements/features/FTR-001_访客ID生成与管理.md`
 - Sequence: `/cdase/project/design/uml/FTR-001.sequence.puml`
-- Tests: `/tests/android/test_FUN_001_detect_guest_id.kt`
-- Code Entry: `com.twelfth.tangxiaonuan.data.local.GuestIdManager.detectGuestId()` (Android 客户端)
+- Tests: `/shared/src/commonTest/kotlin/com/twelfth/data/local/GuestIdManagerDetectTest.kt`
+- Code Entry: 
+  - Shared: `shared/src/commonMain/kotlin/com.twelfth.data.local.GuestIdManager.detectGuestId()`
+  - Android Impl: `shared/src/androidMain/kotlin/com.twelfth.data.local.LocalStorage.kt`
 
 ## 10. Version History
 - v0.1 (2026-01-29)

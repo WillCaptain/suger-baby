@@ -92,8 +92,8 @@
 ## Constructable Classes
 
 ### User (用户实体)
-- **包路径**: `com.twelfth.user.entity.User`
-- **描述**: 用户基本信息实体（严格面向对象设计）
+- **包路径**: `com.twelfth.domain.entity.User` (KMM Shared)
+- **描述**: 用户基本信息实体（跨平台共享，严格面向对象设计）
 - **关键字段**:
   - `userId: String` - 用户唯一ID (GUEST_* 或 USER_*)
   - `userType: String` - 用户类型 (guest/normal)
@@ -105,8 +105,8 @@
   - `isDeleted: Boolean` - 软删除标记
 
 ### MedicalHistory (病例实体)
-- **包路径**: `com.twelfth.user.entity.MedicalHistory`
-- **描述**: 用户医疗病史信息（严格面向对象设计）
+- **包路径**: `com.twelfth.domain.entity.MedicalHistory` (KMM Shared)
+- **描述**: 用户医疗病史信息（跨平台共享，严格面向对象设计）
 - **关键字段**:
   - `medicalHistoryId: String` - 病例ID
   - `userId: String` - 关联用户ID

@@ -3,30 +3,39 @@ title FTR-001 访客ID生成与管理 - Sequence Diagram
 
 actor 用户 as User
 participant "Android APP\n(MainActivity)" as App
-participant "GuestIdManager\n(Data Layer)" as Manager
-participant "SharedPreferences\n(tangxiaonuan_prefs)" as Storage
+participant "GuestIdManager\n(KMM Shared)" as Manager
+participant "LocalStorage\n(Android Impl)" as Storage
+participant "SharedPreferences" as AndroidPrefs
 participant "后端API\n(/api/v1/users/guest)" as API
 
 == 首次访问场景 ==
 User -> App: 打开 Android 应用
 activate App
 
-App -> Manager: detectGuestId(context)
+App -> Manager: detectGuestId(localStorage)
 activate Manager
-note right of Manager: FUN-001: 检测访客ID存在性
-Manager -> Storage: getString("GUEST_ID", null)
+note right of Manager: FUN-001: 检测访客ID存在性\n(KMM Shared 模块)
+Manager -> Storage: getString("GUEST_ID")
 activate Storage
+Storage -> AndroidPrefs: getString("GUEST_ID", null)
+activate AndroidPrefs
+AndroidPrefs --> Storage: null
+deactivate AndroidPrefs
 Storage --> Manager: null (不存在)
 deactivate Storage
 Manager --> App: null
 deactivate Manager
 
-App -> Manager: generateGuestId(context)
+App -> Manager: generateGuestId(localStorage)
 activate Manager
-note right of Manager: FUN-002: 生成访客ID
+note right of Manager: FUN-002: 生成访客ID\n(KMM Shared 模块)
 Manager -> Manager: 生成ID\nGUEST_<timestamp>_<random>
-Manager -> Storage: putString("GUEST_ID", guestId)
+Manager -> Storage: setString("GUEST_ID", guestId)
 activate Storage
+Storage -> AndroidPrefs: putString("GUEST_ID", guestId)
+activate AndroidPrefs
+AndroidPrefs --> Storage: 成功
+deactivate AndroidPrefs
 Storage --> Manager: 存储成功
 deactivate Storage
 Manager --> App: guestId

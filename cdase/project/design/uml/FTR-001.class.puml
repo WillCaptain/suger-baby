@@ -1,47 +1,74 @@
 @startuml
 title FTR-001 访客ID生成与管理 - Class Diagram
 
-package "Android/Data Layer" {
+package "KMM Shared Module (commonMain)" {
   class GuestIdManager {
     - STORAGE_KEY: String = "GUEST_ID"
-    - PREFS_NAME: String = "tangxiaonuan_prefs"
     - ID_PATTERN: Regex = Regex("^GUEST_\\d{13}_[a-z0-9]{8}$")
     
-    + detectGuestId(context: Context): String?
-    + generateGuestId(context: Context): String
+    + detectGuestId(localStorage: LocalStorage): String?
+    + generateGuestId(localStorage: LocalStorage): String
     + validateGuestId(id: String): Boolean
     - generateRandomString(length: Int): String
     - getCurrentTimestamp(): Long
   }
   
+  interface LocalStorage <<expect>> {
+    + getString(key: String): String?
+    + setString(key: String, value: String)
+    + remove(key: String)
+  }
+  
   note right of GuestIdManager::detectGuestId
     FUN-001: 检测访客ID存在性
-    从 SharedPreferences 读取访客ID
+    从本地存储读取访客ID（跨平台）
     如果格式无效，清除并返回 null
   end note
   
   note right of GuestIdManager::generateGuestId
     FUN-002: 生成访客ID
     格式: GUEST_<timestamp>_<random>
-    生成后立即存储到 SharedPreferences
+    生成后立即存储（跨平台）
+  end note
+  
+  note right of LocalStorage
+    expect/actual 模式
+    Android: SharedPreferences
+    iOS: UserDefaults
   end note
 }
 
-package "Android Framework" {
-  interface SharedPreferences <<external>> {
+package "Android Specific (androidMain)" <<actual>> {
+  class "LocalStorage\n<<actual>>" as AndroidLocalStorage {
+    - sharedPrefs: SharedPreferences
+    
+    + getString(key: String): String?
+    + setString(key: String, value: String)
+    + remove(key: String)
+  }
+  
+  interface SharedPreferences <<Android Framework>> {
     + getString(key: String, defValue: String?): String?
     + edit(): Editor
   }
   
-  interface Editor <<external>> {
-    + putString(key: String, value: String): Editor
-    + remove(key: String): Editor
-    + apply(): void
+  note right of AndroidLocalStorage
+    Android 平台实现
+    使用 SharedPreferences
+  end note
+}
+
+package "iOS Specific (iosMain)" <<actual>> {
+  class "LocalStorage\n<<actual>>" as iOSLocalStorage {
+    + getString(key: String): String?
+    + setString(key: String, value: String)
+    + remove(key: String)
   }
   
-  note right of SharedPreferences
-    Android 原生存储 API
-    提供轻量级键值对存储能力
+  note right of iOSLocalStorage
+    iOS 平台实现
+    使用 NSUserDefaults
+    (P2 阶段)
   end note
 }
 
@@ -59,8 +86,10 @@ package "Backend API" <<optional>> {
   end note
 }
 
-GuestIdManager ..> SharedPreferences : uses
-SharedPreferences ..> Editor : creates
+GuestIdManager ..> LocalStorage : depends
+LocalStorage <|.. AndroidLocalStorage : implements
+LocalStorage <|.. iOSLocalStorage : implements
+AndroidLocalStorage ..> SharedPreferences : uses
 GuestIdManager ..> UserGuestAPI : optional\nregister
 
 package "Models" {

@@ -21,15 +21,15 @@
 
 ## 2. API / Method
 
-### Android 客户端方法（Kotlin）
-- `GuestIdManager.generateGuestId(context: Context): String`
-  - **Description**: 生成访客ID并存储到 SharedPreferences
+### KMM 共享模块方法（Kotlin Multiplatform）
+- `GuestIdManager.generateGuestId(localStorage: LocalStorage): String`
+  - **Description**: 生成访客ID并存储到本地存储（跨平台）
   - **Params**: 
-    - `context: Context` - Android 上下文对象
+    - `localStorage: LocalStorage` - 本地存储抽象接口（Android: SharedPreferences, iOS: UserDefaults）
   - **Returns**: 
     - `String`: 新生成的访客ID（格式：`GUEST_<timestamp>_<random>`）
   - **Throws**: 
-    - `StorageException`: SharedPreferences 写入失败
+    - `StorageException`: 本地存储写入失败
 
 ### ID 生成规则
 - **格式**: `GUEST_<timestamp>_<random>`
@@ -39,15 +39,17 @@
 
 ### 存储键
 - **Storage Key**: `GUEST_ID`
-- **存储位置**: SharedPreferences (`tangxiaonuan_prefs`)
+- **存储位置**: 
+  - Android: SharedPreferences (`twelfth_prefs`)
+  - iOS: UserDefaults (未来)
 
 ## 3. Acceptance Criteria (Testable Contract)
 
-- **AC-01**: Given 调用 `generateGuestId(context)`，When 生成成功，Then 返回格式为 `GUEST_<timestamp>_<random>` 的字符串
-- **AC-02**: Given 调用 `generateGuestId(context)`，When 生成成功，Then 访客ID 已保存到 SharedPreferences（键: `GUEST_ID`）
-- **AC-03**: Given 短时间内多次调用 `generateGuestId(context)`，When 生成多个ID，Then 每个ID的 timestamp 部分不同或 random 部分不同（保证唯一性）
+- **AC-01**: Given 调用 `generateGuestId(localStorage)`，When 生成成功，Then 返回格式为 `GUEST_<timestamp>_<random>` 的字符串
+- **AC-02**: Given 调用 `generateGuestId(localStorage)`，When 生成成功，Then 访客ID 已保存到本地存储（键: `GUEST_ID`）
+- **AC-03**: Given 短时间内多次调用 `generateGuestId(localStorage)`，When 生成多个ID，Then 每个ID的 timestamp 部分不同或 random 部分不同（保证唯一性）
 - **AC-04**: Given 生成的访客ID，When 验证格式，Then timestamp 为13位数字，random 为8位小写字母或数字
-- **AC-05**: Given SharedPreferences 写入失败，When 调用 `generateGuestId(context)`，Then 抛出 `StorageException` 异常
+- **AC-05**: Given 本地存储写入失败，When 调用 `generateGuestId(localStorage)`，Then 抛出 `StorageException` 异常
 
 ## 4. Error Handling & Edge Cases
 
@@ -97,8 +99,10 @@
 
 - Feature: `/cdase/project/requirements/features/FTR-001_访客ID生成与管理.md`
 - Sequence: `/cdase/project/design/uml/FTR-001.sequence.puml`
-- Tests: `/tests/android/test_FUN_002_generate_guest_id.kt`
-- Code Entry: `com.twelfth.tangxiaonuan.data.local.GuestIdManager.generateGuestId()` (Android 客户端)
+- Tests: `/shared/src/commonTest/kotlin/com/twelfth/data/local/GuestIdManagerGenerateTest.kt`
+- Code Entry: 
+  - Shared: `shared/src/commonMain/kotlin/com.twelfth.data.local.GuestIdManager.generateGuestId()`
+  - Android Impl: `shared/src/androidMain/kotlin/com.twelfth.data.local.LocalStorage.kt`
 
 ## 10. Version History
 - v0.1 (2026-01-29)

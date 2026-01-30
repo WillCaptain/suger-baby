@@ -21,7 +21,7 @@
 10. [Active] **测试策略规范**：关键测试必须覆盖 Entity 层，可 mock 所有持久化服务；各层测试必须独立覆盖（Entity/Persistence/Service/Controller）；Controller 层测试为端到端全量测试（不 mock）
 11. [Active] **数据库选型与测试策略**：生产环境使用 PostgreSQL；Persistence 层测试可使用 H2 内存数据库（提速）；Controller E2E 测试使用真实 PostgreSQL（TestContainers）；需注意 SQL 语法兼容性
 12. [Active] **Git 操作规范**：禁止在用户没有明确给出指令的情况下执行 `git commit` 或 `git push` 操作；所有代码提交必须由用户显式请求
-13. [Active] **Android 技术栈规范**：客户端使用 Kotlin + Jetpack 架构；本地存储使用 SharedPreferences；登录方式为手机号+验证码（P1）；支付方式为支付宝+微信支付（P1）
+13. [Active] **KMM 跨平台技术栈规范**：客户端使用 Kotlin Multiplatform Mobile (KMM) 架构；P0 阶段仅实现 Android 平台；共享业务逻辑代码；为未来 iOS 扩展打好基础
 
 ---
 
@@ -313,65 +313,204 @@ User: "commit 并 push"
 AI: [执行 git commit 和 git push] "已提交并推送到远程"
 ```
 
-### Convention 13: Android 技术栈规范
+### Convention 13: KMM 跨平台技术栈规范
 
-**平台定位**：糖小暖是一款 **Android 原生应用**（非微信小程序）
+**平台定位**：糖小暖采用 **Kotlin Multiplatform Mobile (KMM)** 架构，支持 Android 和 iOS（未来）
 
-**技术栈**：
+**核心架构原则**：
+- **共享业务逻辑**：数据层、业务逻辑、网络请求代码在 Android 和 iOS 间共享
+- **平台特定 UI**：Android 使用 Jetpack Compose，iOS 使用 SwiftUI（未来）
+- **P0 阶段**：仅实现 Android 平台，但使用 KMM 项目结构为未来扩展打基础
 
-1. **客户端开发**：
-   - 开发语言：**Kotlin**
-   - 架构组件：**Jetpack** (ViewModel, LiveData, Room, Navigation, etc.)
-   - UI 框架：Jetpack Compose（推荐）或 XML Layouts
-   - 异步处理：Kotlin Coroutines + Flow
-   - 网络请求：Retrofit + OkHttp
-   - 依赖注入：Hilt (Dagger)
+---
 
-2. **本地存储方案**：
-   - **SharedPreferences**（用于访客ID、用户配置等轻量级数据）
-   - Room Database（用于本地缓存、离线数据）
-   - 文件存储：Android File System（用于图片、文档等）
+**项目结构**：
 
-3. **用户认证（版本规划）**：
-   - **P0（当前版本）**：仅支持**访客模式**（Guest ID，存储在 SharedPreferences）
-   - **P1（下个版本）**：**手机号 + 验证码**登录（SMS OTP）
-   - P2（未来版本）：支持第三方登录（微信开放平台、Google 登录等）
+```
+project/
+├── shared/                           # KMM 共享模块（跨平台）
+│   ├── src/
+│   │   ├── commonMain/              # 共享代码（Android + iOS）
+│   │   │   ├── kotlin/
+│   │   │   │   └── com.twelfth/
+│   │   │   │       ├── data/        # 数据层（共享）
+│   │   │   │       │   ├── model/   # 数据模型
+│   │   │   │       │   ├── network/ # 网络请求（Ktor）
+│   │   │   │       │   └── repository/
+│   │   │   │       ├── domain/      # 业务逻辑层（共享）
+│   │   │   │       │   ├── entity/  # 领域实体
+│   │   │   │       │   └── usecase/ # 用例
+│   │   │   │       └── common/      # 通用工具
+│   │   ├── androidMain/             # Android 特定实现
+│   │   │   └── kotlin/
+│   │   │       └── com.twelfth/
+│   │   │           └── data/
+│   │   │               └── local/   # SharedPreferences 实现
+│   │   └── iosMain/                 # iOS 特定实现（P2）
+│   │       └── kotlin/
+│   │           └── com.twelfth/
+│   │               └── data/
+│   │                   └── local/   # UserDefaults 实现
+│   └── build.gradle.kts             # KMM 配置
+├── androidApp/                       # Android 应用（UI 层）
+│   └── src/main/kotlin/
+│       └── com.twelfth.android/
+│           ├── ui/                   # Jetpack Compose UI
+│           ├── viewmodel/            # ViewModel
+│           └── di/                   # Hilt 依赖注入
+└── iosApp/                           # iOS 应用（P2，未来）
+    └── iosApp/
+        └── ContentView.swift         # SwiftUI
+```
 
-4. **支付方式（版本规划）**：
-   - **P0（当前版本）**：不支持支付功能
-   - **P1（未来版本）**：集成**支付宝 SDK** + **微信支付 SDK**（Android 版本）
-   - 需要服务端配合处理支付回调和订单状态
+---
 
-5. **代码组织结构**：
-   ```
-   com.twelfth.tangxiaonuan/
-   ├── data/                    # 数据层
-   │   ├── local/              # 本地存储（SharedPreferences, Room）
-   │   ├── remote/             # 网络请求（Retrofit API）
-   │   └── repository/         # Repository 模式
-   ├── domain/                  # 业务逻辑层
-   │   ├── model/              # 领域模型
-   │   └── usecase/            # 用例
-   ├── presentation/            # 展示层
-   │   ├── ui/                 # UI 组件（Activity, Fragment, Compose）
-   │   └── viewmodel/          # ViewModel
-   └── di/                      # 依赖注入模块
-   ```
+**技术栈详细说明**：
 
-**与后端的交互**：
+### 1. 共享模块（shared）
+
+**开发语言**：
+- **Kotlin Multiplatform**
+
+**网络请求**：
+- **Ktor Client**（跨平台 HTTP 客户端）
+- 支持 Android（OkHttp 引擎）和 iOS（Darwin 引擎）
+
+**序列化**：
+- **kotlinx.serialization**（跨平台 JSON 序列化）
+
+**并发处理**：
+- **Kotlin Coroutines**（跨平台协程）
+
+**本地存储接口**（expect/actual 模式）：
+```kotlin
+// commonMain - 定义接口
+expect class LocalStorage {
+    fun getString(key: String): String?
+    fun setString(key: String, value: String)
+}
+
+// androidMain - Android 实现
+actual class LocalStorage(private val context: Context) {
+    private val prefs = context.getSharedPreferences("twelfth_prefs", MODE_PRIVATE)
+    
+    actual fun getString(key: String): String? = prefs.getString(key, null)
+    actual fun setString(key: String, value: String) {
+        prefs.edit().putString(key, value).apply()
+    }
+}
+
+// iosMain - iOS 实现（未来）
+actual class LocalStorage {
+    actual fun getString(key: String): String? {
+        return NSUserDefaults.standardUserDefaults.stringForKey(key)
+    }
+    actual fun setString(key: String, value: String) {
+        NSUserDefaults.standardUserDefaults.setObject(value, forKey: key)
+    }
+}
+```
+
+---
+
+### 2. Android 应用（androidApp）
+
+**UI 框架**：
+- **Jetpack Compose**（声明式 UI）
+
+**架构组件**：
+- **ViewModel**（状态管理）
+- **Navigation Compose**（导航）
+
+**依赖注入**：
+- **Hilt**（Dagger）
+
+**与 shared 模块集成**：
+```kotlin
+// androidApp 中使用 shared 模块
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        
+        // 使用共享模块中的 GuestIdManager
+        val guestIdManager = GuestIdManager(LocalStorage(this))
+        val guestId = guestIdManager.detectGuestId()
+        
+        setContent {
+            TangXiaoNuanTheme {
+                HomeScreen(guestId = guestId)
+            }
+        }
+    }
+}
+```
+
+---
+
+### 3. 版本规划
+
+**P0（当前版本）**：
+- ✅ 实现 Android 平台
+- ✅ 使用 KMM 项目结构
+- ✅ 共享模块：数据层、业务逻辑、网络请求
+- ✅ Android UI：Jetpack Compose
+- ✅ 访客模式（Guest ID，存储在 SharedPreferences）
+
+**P1（下个版本）**：
+- 手机号 + 验证码登录
+- 支付功能（支付宝 + 微信支付）
+
+**P2（未来版本）**：
+- 🚀 扩展到 iOS 平台
+- 复用 shared 模块中的 60-80% 代码
+- 仅需开发 iOS UI 层（SwiftUI）
+
+---
+
+### 4. 与后端的交互
+
 - 所有 REST API 统一使用 `/api/v1/` 前缀
-- Android 客户端通过 Retrofit 调用后端 API
+- 使用 **Ktor Client** 调用后端 API（在 shared 模块中）
 - 访客ID通过 HTTP Header 或 Body 传递给后端
 
-**本地存储示例**（访客ID）：
+**示例**（shared 模块中的网络请求）：
 ```kotlin
-// 存储访客ID
-val sharedPrefs = context.getSharedPreferences("tangxiaonuan_prefs", Context.MODE_PRIVATE)
-sharedPrefs.edit().putString("GUEST_ID", guestId).apply()
-
-// 读取访客ID
-val guestId = sharedPrefs.getString("GUEST_ID", null)
+// shared/commonMain
+class ApiClient {
+    private val client = HttpClient {
+        install(ContentNegotiation) {
+            json(Json { ignoreUnknownKeys = true })
+        }
+    }
+    
+    suspend fun registerGuest(guestId: String): GuestTokenResponse {
+        return client.post("https://api.twelfth.com/api/v1/users/guest/register") {
+            contentType(ContentType.Application.Json)
+            setBody(mapOf("guestId" to guestId))
+        }.body()
+    }
+}
 ```
+
+---
+
+### 5. 关键优势
+
+| 特性 | KMM 方案 | 纯 Android 方案 |
+|------|---------|----------------|
+| **代码复用** | 60-80% 代码可复用到 iOS | 0%，需用 Swift 重写 |
+| **开发效率** | 初期略慢 10-20%，后期快 60%+ | 当前快，未来慢 |
+| **架构质量** | 强制分层，清晰 | 需自律 |
+| **未来扩展性** | 优秀 | 需重写 |
+| **学习曲线** | 中等（需学习 KMM 配置） | 低 |
+
+---
+
+### 6. 开发工具
+
+- **IDE**: Android Studio（支持 KMM 插件）
+- **构建工具**: Gradle（Kotlin DSL）
+- **版本管理**: Git
 
 ---
 
@@ -383,10 +522,10 @@ val guestId = sharedPrefs.getString("GUEST_ID", null)
 
 ---
 
-**Last Updated**: 2026-01-30 10:15  
+**Last Updated**: 2026-01-30 11:00  
 **Updated By**: hangxiao  
 **Total Conventions**: 13 条活跃约定  
 **SQL 兼容性**: 必须兼容 H2 (PostgreSQL 模式) 和 PostgreSQL  
 **Git 控制**: 禁止 AI 自动提交或推送代码  
-**平台**: Android 原生应用（Kotlin + Jetpack）
+**平台**: Kotlin Multiplatform Mobile (KMM)，P0 仅 Android，P2 扩展 iOS
 

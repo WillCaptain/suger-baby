@@ -44,11 +44,13 @@
 
 ---
 
-**Last Updated**: 2026-01-30 10:30  
+**Last Updated**: 2026-01-30 11:00  
 **Updated By**: hangxiao  
 **Total Scenarios**: 9 (全部为 P0 优先级)  
 **Total Features**: 3 (FTR-001 Design Complete, FTR-002/003 延期到 P1)  
 **Total Functions**: 2 (FUN-001, FUN-002 已完成设计)  
 **Active Assignees**: hangxiao (8 scenarios, 1 feature, 2 functions), Will (1 scenario)  
-**Platform**: Android 原生应用 (Kotlin + Jetpack)  
+**Architecture**: Kotlin Multiplatform Mobile (KMM)  
+**Platform**: P0 阶段仅 Android，P2 扩展 iOS  
+**Code Sharing**: 60-80% 业务逻辑代码在 shared 模块中跨平台共享  
 **Git Status**: ✅ 已同步到远程仓库

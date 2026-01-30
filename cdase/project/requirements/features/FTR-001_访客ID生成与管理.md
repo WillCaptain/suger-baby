@@ -54,11 +54,13 @@
 ## 4. User Journey / Flow (Text)
 
 1. **用户打开 Android 应用**：用户首次打开"糖小暖"应用
-2. **系统检测新用户**：检测到本地无访客ID [FUN-001]
-3. **自动生成访客ID**：客户端生成唯一访客 ID（格式：`GUEST_<timestamp>_<random>`）[FUN-002]
-4. **保存访客ID到本地**：客户端将访客ID保存到 SharedPreferences
+2. **系统检测新用户**：检测到本地无访客ID [FUN-001]（共享模块逻辑）
+3. **自动生成访客ID**：客户端生成唯一访客 ID（格式：`GUEST_<timestamp>_<random>`）[FUN-002]（共享模块逻辑）
+4. **保存访客ID到本地**：通过平台特定实现保存（Android: SharedPreferences，iOS: UserDefaults）
 5. **访客身份生效**：用户使用访客ID访问所有核心功能（血糖、饮食、运动、数字人）
-6. **后续访问复用**：用户再次打开应用，从 SharedPreferences 读取访客ID，继续使用
+6. **后续访问复用**：用户再次打开应用，从本地存储读取访客ID，继续使用
+
+**架构说明**：步骤2-3在 KMM shared 模块中实现（跨平台），步骤4使用平台特定实现（expect/actual）
 
 ## 5. Functional Composition (Functions)
 
@@ -69,11 +71,12 @@
 
 ## 6. Acceptance Criteria (Feature-level)
 
-- **FAC-01**: Given 用户首次打开应用，When 客户端检测本地 SharedPreferences 无访客ID，Then 自动生成唯一访客ID并存储到 SharedPreferences
+- **FAC-01**: Given 用户首次打开应用，When 客户端检测本地存储无访客ID，Then 自动生成唯一访客ID并存储（跨平台逻辑）
 - **FAC-02**: Given 访客ID已生成，When 用户访问血糖/饮食/运动记录接口，Then 系统正常响应并关联访客ID
-- **FAC-03**: Given 用户再次打开应用，When SharedPreferences 中已有访客ID，Then 复用该ID，不重新生成
-- **FAC-04**: Given 用户清除应用数据，When 再次打开应用，Then 生成新的访客ID，旧数据无法访问
+- **FAC-03**: Given 用户再次打开应用，When 本地存储中已有访客ID，Then 复用该ID，不重新生成
+- **FAC-04**: Given 用户清除应用数据（Android）或卸载重装（iOS），When 再次打开应用，Then 生成新的访客ID，旧数据无法访问
 - **FAC-05**: Given 用户使用无效或格式错误的访客ID，When 访问接口，Then 返回 400 BadRequest
+- **FAC-06**: Given 共享模块在 Android 和 iOS 上运行，When 执行访客ID生成和检测，Then 行为一致（跨平台测试）
 
 ## 9. Design Artifacts Index
 - Sequence Diagram: `/cdase/project/design/uml/FTR-001.sequence.puml`
@@ -81,10 +84,12 @@
 - ADRs: _(待创建)_
 
 ## 10. Test & Acceptance Index
-- Feature-level acceptance tests: `/tests/feature/test_FTR-001_guest_id_generation.py`
+- Feature-level acceptance tests: `/shared/src/commonTest/kotlin/com/twelfth/feature/FTR001GuestIdGenerationTest.kt`
 - Related Function tests: 
-  - `/tests/function/test_FUN-001_detect_guest_id.py`
-  - `/tests/function/test_FUN-002_generate_guest_id.py`
+  - `/shared/src/commonTest/kotlin/com/twelfth/data/local/GuestIdManagerDetectTest.kt` (FUN-001)
+  - `/shared/src/commonTest/kotlin/com/twelfth/data/local/GuestIdManagerGenerateTest.kt` (FUN-002)
+- Android specific tests:
+  - `/androidApp/src/androidTest/kotlin/com/twelfth/android/LocalStorageTest.kt` (测试 SharedPreferences 实现)
 
 ## 11. Gate Checklist (AI MUST enforce)
 
