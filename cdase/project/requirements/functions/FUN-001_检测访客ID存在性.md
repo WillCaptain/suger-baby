@@ -17,48 +17,48 @@
 
 ## 1. Summary (One Paragraph)
 
-检查微信小程序本地存储（Storage）中是否存在访客ID。这是访客身份管理的第一步，用于判断用户是首次访问还是重复访问。如果本地缓存中存在有效的访客ID，则复用该ID；否则触发访客ID生成流程。
+检查 Android 应用本地存储（SharedPreferences）中是否存在访客ID。这是访客身份管理的第一步，用于判断用户是首次访问还是重复访问。如果 SharedPreferences 中存在有效的访客ID，则复用该ID；否则触发访客ID生成流程。
 
 ## 2. API / Method
 
-### 前端方法（微信小程序）
-- `GuestIdManager.detectGuestId() -> Promise<string | null>`
-  - **Description**: 从本地 Storage 读取访客ID
-  - **Params**: 无
+### Android 客户端方法（Kotlin）
+- `GuestIdManager.detectGuestId(context: Context): String?`
+  - **Description**: 从 SharedPreferences 读取访客ID
+  - **Params**: 
+    - `context: Context` - Android 上下文对象
   - **Returns**: 
-    - `string`: 访客ID（格式：`GUEST_<timestamp>_<random>`）
-    - `null`: 本地无访客ID
+    - `String?`: 访客ID（格式：`GUEST_<timestamp>_<random>`），如果不存在则返回 null
   - **Throws**: 无（读取失败返回 null）
 
 ### 存储键
 - **Storage Key**: `GUEST_ID`
-- **存储位置**: 微信小程序 `wx.getStorageSync('GUEST_ID')`
+- **存储位置**: SharedPreferences (`tangxiaonuan_prefs`)
 
 ## 3. Acceptance Criteria (Testable Contract)
 
-- **AC-01**: Given 本地 Storage 中存在键 `GUEST_ID`，When 调用 `detectGuestId()`，Then 返回该访客ID字符串
-- **AC-02**: Given 本地 Storage 中不存在键 `GUEST_ID`，When 调用 `detectGuestId()`，Then 返回 `null`
-- **AC-03**: Given 本地 Storage 中访客ID格式无效（不符合 `GUEST_*` 模式），When 调用 `detectGuestId()`，Then 返回 `null` 并清除无效数据
-- **AC-04**: Given 读取 Storage 发生异常，When 调用 `detectGuestId()`，Then 返回 `null` 并记录错误日志
+- **AC-01**: Given SharedPreferences 中存在键 `GUEST_ID`，When 调用 `detectGuestId(context)`，Then 返回该访客ID字符串
+- **AC-02**: Given SharedPreferences 中不存在键 `GUEST_ID`，When 调用 `detectGuestId(context)`，Then 返回 `null`
+- **AC-03**: Given SharedPreferences 中访客ID格式无效（不符合 `GUEST_*` 模式），When 调用 `detectGuestId(context)`，Then 返回 `null` 并清除无效数据
+- **AC-04**: Given 读取 SharedPreferences 发生异常，When 调用 `detectGuestId(context)`，Then 返回 `null` 并记录错误日志
 
 ## 4. Error Handling & Edge Cases
 
-- **E-01**: Storage 读取失败 → 捕获异常，返回 `null`，记录日志
+- **E-01**: SharedPreferences 读取失败 → 捕获异常，返回 `null`，记录日志
 - **E-02**: 访客ID格式无效 → 清除无效数据，返回 `null`
 - **E-03**: 访客ID为空字符串 → 返回 `null`
 
 ## 5. Contract Tests Index
 
 ### Test File
-- Path: `/tests/frontend/test_FUN_001_detect_guest_id.js`
+- Path: `/tests/android/test_FUN_001_detect_guest_id.kt`
 
 ### Test Cases
 | AC ID | Test Name | Description | Input Set | Expected Output |
 |------|-----------|-------------|-----------|-----------------|
-| AC-01 | test_FUN_001_AC_01_valid_guest_id_exists | 有效访客ID存在 | Storage: `GUEST_1706543210_abc123` | 返回 `GUEST_1706543210_abc123` |
-| AC-02 | test_FUN_001_AC_02_no_guest_id | 无访客ID | Storage: empty | 返回 `null` |
-| AC-03 | test_FUN_001_AC_03_invalid_format | 格式无效 | Storage: `invalid_id` | 返回 `null`，清除数据 |
-| AC-04 | test_FUN_001_AC_04_storage_error | Storage异常 | Storage: throws error | 返回 `null`，记录日志 |
+| AC-01 | test_FUN_001_AC_01_valid_guest_id_exists | 有效访客ID存在 | SharedPreferences: `GUEST_1706543210_abc123` | 返回 `GUEST_1706543210_abc123` |
+| AC-02 | test_FUN_001_AC_02_no_guest_id | 无访客ID | SharedPreferences: empty | 返回 `null` |
+| AC-03 | test_FUN_001_AC_03_invalid_format | 格式无效 | SharedPreferences: `invalid_id` | 返回 `null`，清除数据 |
+| AC-04 | test_FUN_001_AC_04_storage_error | SharedPreferences异常 | SharedPreferences: throws error | 返回 `null`，记录日志 |
 
 ## 6. Gate Checklist (AI MUST enforce)
 
@@ -88,8 +88,8 @@
 
 - Feature: `/cdase/project/requirements/features/FTR-001_访客ID生成与管理.md`
 - Sequence: `/cdase/project/design/uml/FTR-001.sequence.puml`
-- Tests: `/tests/frontend/test_FUN_001_detect_guest_id.js`
-- Code Entry: `utils/GuestIdManager.detectGuestId()` (前端小程序)
+- Tests: `/tests/android/test_FUN_001_detect_guest_id.kt`
+- Code Entry: `com.twelfth.tangxiaonuan.data.local.GuestIdManager.detectGuestId()` (Android 客户端)
 
 ## 10. Version History
 - v0.1 (2026-01-29)
@@ -100,5 +100,5 @@
 
 ## 12. Risks & Non-Breakable Invariants
 
-- **R-01**: 用户清除小程序缓存导致访客ID丢失 (检测方式: 监控访客ID重复生成率)
+- **R-01**: 用户清除应用数据导致访客ID丢失 (检测方式: 监控访客ID重复生成率)
 - **INV-01**: 检测逻辑必须是同步的，不能有网络请求 (测试强制: 单元测试不允许 mock 网络)

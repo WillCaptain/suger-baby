@@ -53,12 +53,12 @@
 
 ## 4. User Journey / Flow (Text)
 
-1. **用户打开小程序**：用户首次打开"糖小暖"应用
+1. **用户打开 Android 应用**：用户首次打开"糖小暖"应用
 2. **系统检测新用户**：检测到本地无访客ID [FUN-001]
-3. **自动生成访客ID**：前端生成唯一访客 ID（格式：`GUEST_<timestamp>_<random>`）[FUN-002]
-4. **保存访客ID到本地**：前端将访客ID保存到本地缓存（微信小程序 Storage）
+3. **自动生成访客ID**：客户端生成唯一访客 ID（格式：`GUEST_<timestamp>_<random>`）[FUN-002]
+4. **保存访客ID到本地**：客户端将访客ID保存到 SharedPreferences
 5. **访客身份生效**：用户使用访客ID访问所有核心功能（血糖、饮食、运动、数字人）
-6. **后续访问复用**：用户再次打开应用，从本地读取访客ID，继续使用
+6. **后续访问复用**：用户再次打开应用，从 SharedPreferences 读取访客ID，继续使用
 
 ## 5. Functional Composition (Functions)
 
@@ -69,10 +69,10 @@
 
 ## 6. Acceptance Criteria (Feature-level)
 
-- **FAC-01**: Given 用户首次打开应用，When 前端检测本地无访客ID，Then 自动生成唯一访客ID并存储到本地缓存
+- **FAC-01**: Given 用户首次打开应用，When 客户端检测本地 SharedPreferences 无访客ID，Then 自动生成唯一访客ID并存储到 SharedPreferences
 - **FAC-02**: Given 访客ID已生成，When 用户访问血糖/饮食/运动记录接口，Then 系统正常响应并关联访客ID
-- **FAC-03**: Given 用户再次打开应用，When 本地已有访客ID，Then 复用该ID，不重新生成
-- **FAC-04**: Given 用户清除缓存，When 再次打开应用，Then 生成新的访客ID，旧数据无法访问
+- **FAC-03**: Given 用户再次打开应用，When SharedPreferences 中已有访客ID，Then 复用该ID，不重新生成
+- **FAC-04**: Given 用户清除应用数据，When 再次打开应用，Then 生成新的访客ID，旧数据无法访问
 - **FAC-05**: Given 用户使用无效或格式错误的访客ID，When 访问接口，Then 返回 400 BadRequest
 
 ## 9. Design Artifacts Index

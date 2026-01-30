@@ -2,30 +2,30 @@
 title FTR-001 访客ID生成与管理 - Sequence Diagram
 
 actor 用户 as User
-participant "小程序\n(App.onLaunch)" as App
-participant "GuestIdManager\n(Utils)" as Manager
-participant "LocalStorage\n(wx.storage)" as Storage
+participant "Android APP\n(MainActivity)" as App
+participant "GuestIdManager\n(Data Layer)" as Manager
+participant "SharedPreferences\n(tangxiaonuan_prefs)" as Storage
 participant "后端API\n(/api/v1/users/guest)" as API
 
 == 首次访问场景 ==
-User -> App: 打开小程序
+User -> App: 打开 Android 应用
 activate App
 
-App -> Manager: detectGuestId()
+App -> Manager: detectGuestId(context)
 activate Manager
 note right of Manager: FUN-001: 检测访客ID存在性
-Manager -> Storage: wx.getStorageSync('GUEST_ID')
+Manager -> Storage: getString("GUEST_ID", null)
 activate Storage
 Storage --> Manager: null (不存在)
 deactivate Storage
 Manager --> App: null
 deactivate Manager
 
-App -> Manager: generateGuestId()
+App -> Manager: generateGuestId(context)
 activate Manager
 note right of Manager: FUN-002: 生成访客ID
 Manager -> Manager: 生成ID\nGUEST_<timestamp>_<random>
-Manager -> Storage: wx.setStorageSync('GUEST_ID', guestId)
+Manager -> Storage: putString("GUEST_ID", guestId)
 activate Storage
 Storage --> Manager: 存储成功
 deactivate Storage
@@ -42,12 +42,12 @@ App --> User: 进入主页，访客身份生效
 deactivate App
 
 == 重复访问场景 ==
-User -> App: 再次打开小程序
+User -> App: 再次打开应用
 activate App
 
-App -> Manager: detectGuestId()
+App -> Manager: detectGuestId(context)
 activate Manager
-Manager -> Storage: wx.getStorageSync('GUEST_ID')
+Manager -> Storage: getString("GUEST_ID", null)
 activate Storage
 Storage --> Manager: guestId (已存在)
 deactivate Storage
@@ -58,29 +58,29 @@ App --> User: 进入主页，复用访客身份
 deactivate App
 
 == 错误场景：访客ID格式无效 ==
-User -> App: 打开小程序
+User -> App: 打开应用
 activate App
 
-App -> Manager: detectGuestId()
+App -> Manager: detectGuestId(context)
 activate Manager
-Manager -> Storage: wx.getStorageSync('GUEST_ID')
+Manager -> Storage: getString("GUEST_ID", null)
 activate Storage
 Storage --> Manager: "invalid_format"
 deactivate Storage
 
 Manager -> Manager: 验证格式：不符合规范
-Manager -> Storage: wx.removeStorageSync('GUEST_ID')
+Manager -> Storage: remove("GUEST_ID")
 activate Storage
 Storage --> Manager: 清除成功
 deactivate Storage
 Manager --> App: null
 deactivate Manager
 
-App -> Manager: generateGuestId()
+App -> Manager: generateGuestId(context)
 note right of Manager: 重新生成访客ID
 activate Manager
 Manager -> Manager: 生成新ID
-Manager -> Storage: wx.setStorageSync('GUEST_ID', newGuestId)
+Manager -> Storage: putString("GUEST_ID", newGuestId)
 activate Storage
 Storage --> Manager: 存储成功
 deactivate Storage
@@ -90,27 +90,27 @@ deactivate Manager
 App --> User: 进入主页，新访客身份生效
 deactivate App
 
-== 错误场景：Storage 写入失败 ==
-User -> App: 打开小程序
+== 错误场景：SharedPreferences 写入失败 ==
+User -> App: 打开应用
 activate App
 
-App -> Manager: detectGuestId()
+App -> Manager: detectGuestId(context)
 activate Manager
-Manager -> Storage: wx.getStorageSync('GUEST_ID')
+Manager -> Storage: getString("GUEST_ID", null)
 activate Storage
 Storage --> Manager: null
 deactivate Storage
 Manager --> App: null
 deactivate Manager
 
-App -> Manager: generateGuestId()
+App -> Manager: generateGuestId(context)
 activate Manager
 Manager -> Manager: 生成ID
-Manager -> Storage: wx.setStorageSync('GUEST_ID', guestId)
+Manager -> Storage: putString("GUEST_ID", guestId)
 activate Storage
-Storage --> Manager: ❌ StorageError
+Storage --> Manager: ❌ StorageException
 deactivate Storage
-Manager --> App: 抛出 StorageError
+Manager --> App: 抛出 StorageException
 deactivate Manager
 
 App -> User: 显示错误提示\n"初始化失败，请重试"

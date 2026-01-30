@@ -4,7 +4,7 @@
 - Name: [user input]
 - Role: [user input](optional)
 - Team: [user input](optional)
-- Organization: Huawei
+- Organization: 12斋
 
 ## Capabilities
 - CanApprove: true

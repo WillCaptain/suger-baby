@@ -22,12 +22,12 @@
 
 ### POST /api/v1/users/guest/convert
 - **描述**: 访客转正为正式用户，支持新用户升级和老用户数据迁移
-- **参数**: `ConvertUserRequest { wechatOpenId: string, wechatUnionId?: string, phone?: string }`
-- **返回**: `UserResponse { userId: string, userType: string, wechatOpenId: string, ... }`
+- **参数**: `ConvertUserRequest { guestUserId: string, phone: string, smsCode: string }`
+- **返回**: `UserResponse { userId: string, userType: string, phone: string (脱敏), ... }`
 - **异常**: 
-  - `400` - 访客用户不存在或已转正
+  - `400` - 访客用户不存在或已转正、验证码错误
   - `500` - 数据迁移失败（事务回滚）
-- **状态**: Proposed
+- **状态**: Proposed (P1)
 - **关联场景**: SCN-001
 
 ---
@@ -95,12 +95,11 @@
 - **包路径**: `com.twelfth.user.entity.User`
 - **描述**: 用户基本信息实体（严格面向对象设计）
 - **关键字段**:
-  - `userId: String` - 用户唯一ID
+  - `userId: String` - 用户唯一ID (GUEST_* 或 USER_*)
   - `userType: String` - 用户类型 (guest/normal)
-  - `wechatOpenId: String` - 微信 OpenID（加密）
-  - `encryptedName: String` - 加密的姓名
-  - `encryptedPhone: String` - 加密的手机号
-  - `phoneHash: String` - 手机号哈希（用于查询）
+  - `encryptedPhone: String` - 加密的手机号（仅正式用户有）
+  - `phoneHash: String` - 手机号哈希（用于查询，仅正式用户有）
+  - `encryptedName: String` - 加密的姓名（可选）
   - `gender: String` - 性别 (male/female)
   - `age: Integer` - 年龄
   - `isDeleted: Boolean` - 软删除标记
@@ -121,7 +120,7 @@
 ## 依赖关系
 
 - **依赖外部服务**: 
-  - 微信开放平台（获取 OpenID/UnionID）
+  - 短信服务商（发送验证码，P1 阶段）
   - 安全模块（加密解密服务）
 
 - **被依赖**:

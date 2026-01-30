@@ -20,6 +20,8 @@
 9. [Active] **分层架构规范**：代码严格分为 4 层：Controller 层（API）、Service 层（业务组织）、Entity 层（实体关系）、Persistence 层（数据访问）
 10. [Active] **测试策略规范**：关键测试必须覆盖 Entity 层，可 mock 所有持久化服务；各层测试必须独立覆盖（Entity/Persistence/Service/Controller）；Controller 层测试为端到端全量测试（不 mock）
 11. [Active] **数据库选型与测试策略**：生产环境使用 PostgreSQL；Persistence 层测试可使用 H2 内存数据库（提速）；Controller E2E 测试使用真实 PostgreSQL（TestContainers）；需注意 SQL 语法兼容性
+12. [Active] **Git 操作规范**：禁止在用户没有明确给出指令的情况下执行 `git commit` 或 `git push` 操作；所有代码提交必须由用户显式请求
+13. [Active] **Android 技术栈规范**：客户端使用 Kotlin + Jetpack 架构；本地存储使用 SharedPreferences；登录方式为手机号+验证码（P1）；支付方式为支付宝+微信支付（P1）
 
 ---
 
@@ -275,6 +277,102 @@ class UserControllerE2ETest {
 }
 ```
 
+### Convention 12: Git 操作规范
+
+**核心原则**：所有代码提交必须由用户显式控制。
+
+**禁止的操作**：
+- ❌ AI 自动执行 `git commit`
+- ❌ AI 自动执行 `git push`
+- ❌ AI 自动执行 `git commit && git push`
+
+**允许的操作**：
+- ✅ AI 可以执行 `git status` 检查状态
+- ✅ AI 可以执行 `git diff` 查看变更
+- ✅ AI 可以执行 `git add` 暂存文件（如果用户明确要求）
+- ✅ 用户明确说"提交代码"、"commit"、"push"时才能执行
+
+**执行规则**：
+1. AI 完成代码修改后，应报告修改内容，但**不执行 commit**
+2. 用户需要明确说出：
+   - "提交代码" / "commit 代码"
+   - "推送到远程" / "push"
+   - 或其他明确的提交指令
+3. 只有在用户明确指令后，AI 才能执行 `git commit` 和 `git push`
+
+**示例对话**：
+```
+❌ 错误流程：
+User: "帮我修复这个 bug"
+AI: [修复代码] "已修复，代码已提交并推送到远程"  ← 禁止！
+
+✅ 正确流程：
+User: "帮我修复这个 bug"
+AI: [修复代码] "已完成修复，修改了以下文件：... 如需提交，请告诉我。"
+User: "commit 并 push"
+AI: [执行 git commit 和 git push] "已提交并推送到远程"
+```
+
+### Convention 13: Android 技术栈规范
+
+**平台定位**：糖小暖是一款 **Android 原生应用**（非微信小程序）
+
+**技术栈**：
+
+1. **客户端开发**：
+   - 开发语言：**Kotlin**
+   - 架构组件：**Jetpack** (ViewModel, LiveData, Room, Navigation, etc.)
+   - UI 框架：Jetpack Compose（推荐）或 XML Layouts
+   - 异步处理：Kotlin Coroutines + Flow
+   - 网络请求：Retrofit + OkHttp
+   - 依赖注入：Hilt (Dagger)
+
+2. **本地存储方案**：
+   - **SharedPreferences**（用于访客ID、用户配置等轻量级数据）
+   - Room Database（用于本地缓存、离线数据）
+   - 文件存储：Android File System（用于图片、文档等）
+
+3. **用户认证（版本规划）**：
+   - **P0（当前版本）**：仅支持**访客模式**（Guest ID，存储在 SharedPreferences）
+   - **P1（下个版本）**：**手机号 + 验证码**登录（SMS OTP）
+   - P2（未来版本）：支持第三方登录（微信开放平台、Google 登录等）
+
+4. **支付方式（版本规划）**：
+   - **P0（当前版本）**：不支持支付功能
+   - **P1（未来版本）**：集成**支付宝 SDK** + **微信支付 SDK**（Android 版本）
+   - 需要服务端配合处理支付回调和订单状态
+
+5. **代码组织结构**：
+   ```
+   com.twelfth.tangxiaonuan/
+   ├── data/                    # 数据层
+   │   ├── local/              # 本地存储（SharedPreferences, Room）
+   │   ├── remote/             # 网络请求（Retrofit API）
+   │   └── repository/         # Repository 模式
+   ├── domain/                  # 业务逻辑层
+   │   ├── model/              # 领域模型
+   │   └── usecase/            # 用例
+   ├── presentation/            # 展示层
+   │   ├── ui/                 # UI 组件（Activity, Fragment, Compose）
+   │   └── viewmodel/          # ViewModel
+   └── di/                      # 依赖注入模块
+   ```
+
+**与后端的交互**：
+- 所有 REST API 统一使用 `/api/v1/` 前缀
+- Android 客户端通过 Retrofit 调用后端 API
+- 访客ID通过 HTTP Header 或 Body 传递给后端
+
+**本地存储示例**（访客ID）：
+```kotlin
+// 存储访客ID
+val sharedPrefs = context.getSharedPreferences("tangxiaonuan_prefs", Context.MODE_PRIVATE)
+sharedPrefs.edit().putString("GUEST_ID", guestId).apply()
+
+// 读取访客ID
+val guestId = sharedPrefs.getString("GUEST_ID", null)
+```
+
 ---
 
 ## Convention Management
@@ -285,8 +383,10 @@ class UserControllerE2ETest {
 
 ---
 
-**Last Updated**: 2026-01-29 20:30  
+**Last Updated**: 2026-01-30 10:15  
 **Updated By**: hangxiao  
-**Total Conventions**: 11 条活跃约定  
-**SQL 兼容性**: 必须兼容 H2 (PostgreSQL 模式) 和 PostgreSQL
+**Total Conventions**: 13 条活跃约定  
+**SQL 兼容性**: 必须兼容 H2 (PostgreSQL 模式) 和 PostgreSQL  
+**Git 控制**: 禁止 AI 自动提交或推送代码  
+**平台**: Android 原生应用（Kotlin + Jetpack）
 
