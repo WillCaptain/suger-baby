@@ -18,7 +18,7 @@ actual class LocalStorage(context: Context) : ILocalStorage {
     /**
      * 读取字符串
      */
-    override fun getString(key: String): String? {
+    actual override fun getString(key: String): String? {
         return try {
             sharedPreferences.getString(key, null)
         } catch (e: Exception) {
@@ -29,7 +29,7 @@ actual class LocalStorage(context: Context) : ILocalStorage {
     /**
      * 保存字符串
      */
-    override fun setString(key: String, value: String) {
+    actual override fun setString(key: String, value: String) {
         try {
             val editor = sharedPreferences.edit()
             editor.putString(key, value)
@@ -48,7 +48,7 @@ actual class LocalStorage(context: Context) : ILocalStorage {
     /**
      * 移除键值对
      */
-    override fun remove(key: String) {
+    actual override fun remove(key: String) {
         try {
             val editor = sharedPreferences.edit()
             editor.remove(key)
