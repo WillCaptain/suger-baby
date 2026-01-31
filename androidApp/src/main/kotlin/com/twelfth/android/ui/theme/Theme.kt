@@ -34,7 +34,7 @@ private val DarkColorScheme = darkColorScheme(
 )
 
 @Composable
-fun TangXiaoNuanTheme(
+fun TangXiaoWenTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {

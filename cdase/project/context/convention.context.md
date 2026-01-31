@@ -14,7 +14,7 @@
 3. [Active] 禁止在没有显式批准的情况下跨 Feature 修改代码
 4. [Active] 每个 Feature 必须有明确的所有者
 5. [Active] 所有测试必须对应到明确的验收标准
-6. [Active] **Java 包名规范**：基础包名统一为 `com.twelfth`（十二斋的英文），不使用 `tangxiaonuan`
+6. [Active] **Java 包名规范**：基础包名统一为 `com.twelfth`（十二斋的英文），不使用 `tangxiaowen`
 7. [Active] **实体层设计规范**：Entity 层必须严格按照面向对象原则设计，遵循封装、继承、多态原则
 8. [Active] **RESTful API 路径规范**：所有 RESTful API 统一放在 `/api` 目录下，格式为 `/api/v{version}/{resource}`
 9. [Active] **分层架构规范**：代码严格分为 4 层：Controller 层（API）、Service 层（业务组织）、Entity 层（实体关系）、Persistence 层（数据访问）
@@ -315,7 +315,7 @@ AI: [执行 git commit 和 git push] "已提交并推送到远程"
 
 ### Convention 13: KMM 跨平台技术栈规范
 
-**平台定位**：糖小暖采用 **Kotlin Multiplatform Mobile (KMM)** 架构，支持 Android 和 iOS（未来）
+**平台定位**：糖小稳采用 **Kotlin Multiplatform Mobile (KMM)** 架构，支持 Android 和 iOS（未来）
 
 **核心架构原则**：
 - **共享业务逻辑**：数据层、业务逻辑、网络请求代码在 Android 和 iOS 间共享
@@ -437,7 +437,7 @@ class MainActivity : ComponentActivity() {
         val guestId = guestIdManager.detectGuestId()
         
         setContent {
-            TangXiaoNuanTheme {
+            TangXiaoWenTheme {
                 HomeScreen(guestId = guestId)
             }
         }

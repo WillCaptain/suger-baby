@@ -1,4 +1,4 @@
-rootProject.name = "TangXiaoNuan"
+rootProject.name = "TangXiaoWen"
 pluginManagement {
     repositories {
         // 添加以下三行镜像地址

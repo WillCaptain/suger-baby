@@ -9,12 +9,12 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.twelfth.android.ui.theme.TangXiaoNuanTheme
+import com.twelfth.android.ui.theme.TangXiaoWenTheme
 import com.twelfth.data.local.GuestIdManager
 import com.twelfth.data.local.LocalStorage
 
 /**
- * 糖小暖 - 主界面
+ * 糖小稳 - 主界面
  * 
  * 实现 FTR-001：访客ID生成与管理
  */
@@ -33,7 +33,7 @@ class MainActivity : ComponentActivity() {
         val guestId = initializeGuestId()
         
         setContent {
-            TangXiaoNuanTheme {
+            TangXiaoWenTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
@@ -80,7 +80,7 @@ fun HomeScreen(guestId: String) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "欢迎使用糖小暖",
+            text = "欢迎使用糖小稳",
             style = MaterialTheme.typography.headlineLarge,
             color = MaterialTheme.colorScheme.primary
         )

@@ -8,7 +8,7 @@ android {
     compileSdk = 34
     
     defaultConfig {
-        applicationId = "com.twelfth.tangxiaonuan"
+        applicationId = "com.twelfth.tangxiaowen"
         minSdk = 24
         targetSdk = 34
         versionCode = 1

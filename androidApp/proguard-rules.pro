@@ -1,4 +1,4 @@
-# 糖小暖 ProGuard 规则
+# 糖小稳 ProGuard 规则
 
 # Keep Kotlin Metadata
 -keep class kotlin.Metadata { *; }

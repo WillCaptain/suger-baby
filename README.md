@@ -1,11 +1,11 @@
-# 糖小暖 (TangXiaoNuan)
+# 糖小稳 (TangXiaoWen)
 
 一个专为糖尿病患者设计的健康管理应用，使用 Kotlin Multiplatform Mobile (KMM) 架构。
 
 ## 项目结构
 
 ```
-TangXiaoNuan/
+TangXiaoWen/
 ├── shared/                          # KMM 共享模块（跨平台）
 │   ├── src/
 │   │   ├── commonMain/             # 共享代码（Android + iOS）
