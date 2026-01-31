@@ -1,15 +1,43 @@
-# IDE and OS files
-.vscode/
+# Gradle
+.gradle/
+build/
+*/build/
+gradle-app.setting
+!gradle-wrapper.jar
+.gradletasknamecache
+
+# Android
+*.apk
+*.aab
+*.ap_
+*.dex
+local.properties
 .idea/
-target/
-*.swp
-*.swo
-*~
+*.iml
+*.ipr
+*.iws
 .DS_Store
-Thumbs.db
+captures/
+.externalNativeBuild
+.cxx
+
+# Kotlin
+*.kotlin_module
+*.kotlin_metadata
+
+# Build outputs
+bin/
+gen/
+out/
 
 # Logs
 *.log
+
+# IDE
+.vscode/
+*.swp
+*.swo
+*~
 
 # CDASE User Identity (Privacy Protection)
 cdase/project/context/user.context.md
