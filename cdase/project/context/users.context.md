@@ -26,6 +26,16 @@
 - CanClaim: true
 - Joined: 2026-01-29
 
+### Ronny
+- Role: 开发工程师
+- Team: CTRLC
+- Organization: 十二斋
+- Status: Active
+- CanApprove: true
+- CanAssign: true
+- CanClaim: true
+- Joined: 2026-01-31
+
 ---
 
 ## User Management Rules
