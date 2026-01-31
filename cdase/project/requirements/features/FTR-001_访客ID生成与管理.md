@@ -12,10 +12,12 @@
 - Steward: hangxiao
 - Group/Module: User/GuestManagement
 - Priority: P0
-- Version: v0.3
-- Last Updated: 2026-01-29 21:50
-- Resolution Status: Design Complete
+- Version: v1.0
+- Last Updated: 2026-01-31 14:30
+- Resolution Status: ✅ Accepted and Complete
 - Change Log: 
+  - v1.0 - ✅ Feature 完成并验收：所有 FAC 通过，真机测试通过
+  - v0.4 - 完成 Development 阶段：所有单元测试和集成测试通过
   - v0.3 - 完成 Design 阶段：创建 Function 文档、序列图、类图
   - v0.2 - 简化功能，移除令牌管理，仅保留访客ID生成
 - Depends On: 
@@ -47,9 +49,9 @@
 |--------------|--------------|--------------|--------------------|--------------------|--------------------|----------------|
 | Requirement  | Done         | hangxiao     | 2026-01-29 19:45   | 2026-01-29 19:50   | 2026-01-29 19:50   | -              |
 | Design       | Done         | hangxiao     | 2026-01-29 21:40   | 2026-01-29 21:50   | 2026-01-29 21:50   | -              |
-| Development  | NotStarted   | -            | -                  | -                  | -                  | -              |
-| Test         | NotStarted   | -            | -                  | -                  | -                  | -              |
-| Acceptance   | NotStarted   | -            | -                  | -                  | -                  | -              |
+| Development  | Done         | hangxiao     | 2026-01-30 10:00   | 2026-01-31 14:00   | 2026-01-31 14:00   | -              |
+| Test         | Done         | hangxiao     | 2026-01-31 14:00   | 2026-01-31 14:30   | 2026-01-31 14:30   | -              |
+| Acceptance   | Done         | hangxiao     | 2026-01-31 14:30   | 2026-01-31 14:30   | 2026-01-31 14:30   | -              |
 
 ## 4. User Journey / Flow (Text)
 
