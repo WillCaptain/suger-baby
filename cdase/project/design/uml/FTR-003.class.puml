@@ -1,0 +1,159 @@
+@startuml
+title FTR-003 血糖记录管理 - Class Diagram
+
+package "Presentation Layer (UI)" {
+  class GlucoseRecordScreen {
+    - glucoseRecordManager: GlucoseRecordManager
+    - validator: GlucoseValidator
+    + onSaveClick()
+    + onDeleteClick(recordId: String)
+    + onFilterChange(startDate: Date, endDate: Date)
+    - showSuccessMessage()
+    - showErrorMessage(message: String)
+  }
+  
+  class GlucoseRecordForm {
+    + value: Float
+    + measureType: MeasureType
+    + measuredAt: Long
+    + note: String?
+    + validate(): Boolean
+  }
+}
+
+package "Domain Layer (Business Logic)" {
+  class GlucoseRecordManager {
+    - api: GlucoseAPI
+    - validator: GlucoseValidator
+    
+    + createRecord(request: CreateGlucoseRecordRequest): Result<GlucoseRecord>
+    + getRecords(page: Int, pageSize: Int, startDate: Date?, endDate: Date?): Result<GlucoseRecordList>
+    + deleteRecord(recordId: String): Result<Boolean>
+    - handleApiError(error: ApiException): Result<T>
+  }
+  
+  class GlucoseValidator <<FUN-004>> {
+    + validateGlucoseValue(value: Float): ValidationResult
+    - MIN_VALUE: Float = 1.0
+    - MAX_VALUE: Float = 33.3
+  }
+  
+  note right of GlucoseValidator
+    血糖值范围校验
+    1.0 - 33.3 mmol/L
+  end note
+}
+
+package "Data Layer (API)" {
+  interface GlucoseAPI <<FUN-005>> {
+    + createRecord(request: CreateGlucoseRecordRequest): GlucoseRecord
+    + getRecords(page: Int, pageSize: Int, startDate: Date?, endDate: Date?): GlucoseRecordListResponse
+    + deleteRecord(recordId: String): DeleteResponse
+  }
+  
+  class GlucoseAPIImpl {
+    - httpClient: HttpClient
+    - baseUrl: String
+    + createRecord(...): GlucoseRecord
+    + getRecords(...): GlucoseRecordListResponse
+    + deleteRecord(...): DeleteResponse
+  }
+}
+
+package "Data Models" {
+  class GlucoseRecord <<Entity>> {
+    + id: String
+    + userId: String
+    + value: Float
+    + measureType: MeasureType
+    + measuredAt: Long
+    + note: String?
+    + createdAt: Long
+    + updatedAt: Long
+  }
+  
+  enum MeasureType {
+    FASTING
+    BEFORE_MEAL
+    AFTER_MEAL
+    BEFORE_SLEEP
+    RANDOM
+  }
+  
+  class CreateGlucoseRecordRequest {
+    + value: Float
+    + measureType: MeasureType
+    + measuredAt: Long?
+    + note: String?
+  }
+  
+  class GlucoseRecordListResponse {
+    + records: List<GlucoseRecord>
+    + total: Int
+    + page: Int
+    + pageSize: Int
+  }
+  
+  class ValidationResult {
+    + isValid: Boolean
+    + errorMessage: String?
+  }
+  
+  class DeleteResponse {
+    + success: Boolean
+  }
+}
+
+package "Backend (External)" {
+  interface "REST API" as RestAPI {
+    POST /api/v1/glucose/records
+    GET /api/v1/glucose/records
+    DELETE /api/v1/glucose/records/{id}
+  }
+  
+  database "PostgreSQL" as DB {
+    table tbl_glucose_records {
+      + id: VARCHAR(36) PK
+      + user_id: VARCHAR(64)
+      + value: DECIMAL(4,1)
+      + measure_type: VARCHAR(20)
+      + measured_at: BIGINT
+      + note: VARCHAR(200)
+      + created_at: BIGINT
+      + updated_at: BIGINT
+      --
+      INDEX idx_user_measured (user_id, measured_at DESC)
+    }
+  }
+}
+
+' Relationships
+GlucoseRecordScreen --> GlucoseRecordManager : uses
+GlucoseRecordScreen --> GlucoseValidator : uses
+GlucoseRecordScreen ..> GlucoseRecordForm : displays
+
+GlucoseRecordManager --> GlucoseAPI : uses
+GlucoseRecordManager --> GlucoseValidator : uses
+
+GlucoseAPI <|.. GlucoseAPIImpl : implements
+GlucoseAPIImpl --> RestAPI : HTTP calls
+
+GlucoseRecord "1" --> "1" MeasureType : has
+CreateGlucoseRecordRequest --> MeasureType : specifies
+GlucoseRecordListResponse "1" *-- "many" GlucoseRecord : contains
+
+RestAPI --> DB : persists
+
+note "FUN-004: 血糖值范围校验\n1.0 - 33.3 mmol/L" as N1
+GlucoseValidator .. N1
+
+note "FUN-005: 创建血糖记录\nPOST /api/v1/glucose/records" as N2
+GlucoseAPIImpl .. N2
+
+note "FUN-006: 查询血糖记录列表\nGET /api/v1/glucose/records" as N3
+GlucoseAPIImpl .. N3
+
+note "FUN-008: 删除血糖记录\nDELETE /api/v1/glucose/records/{id}" as N4
+GlucoseAPIImpl .. N4
+
+@enduml

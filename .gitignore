@@ -3,7 +3,7 @@
 build/
 */build/
 gradle-app.setting
-!gradle-wrapper.jar
+gradle-wrapper.jar
 .gradletasknamecache
 
 # Android

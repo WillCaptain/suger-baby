@@ -1,0 +1,150 @@
+@startuml
+title FTR-004 血糖数据统计与展示 - Sequence Diagram
+
+actor User as "用户"
+participant UI as "血糖统计\n界面"
+participant Manager as "GlucoseStatisticsManager"
+participant API as "GlucoseAPI\n(FUN-010)"
+participant Backend as "后端服务"
+database DB as "数据库"
+
+== 查看血糖统计流程 ==
+
+User -> UI: 进入血糖统计页面
+activate UI
+
+UI -> UI: 默认选择"今日"统计
+UI -> Manager: getStatistics(period=TODAY, targetValue=7.0)
+activate Manager
+
+Manager -> API: GET /api/v1/glucose/statistics?period=today&targetValue=7.0
+activate API
+note right of API
+  Headers:
+  Authorization: Bearer <token>
+  或 X-Guest-Id: <guestId>
+end note
+
+API -> Backend: HTTP GET
+activate Backend
+
+Backend -> Backend: 验证用户身份
+Backend -> Backend: 解析统计周期\n(TODAY = 今天 00:00 至当前)
+
+Backend -> DB: SELECT \n  COUNT(*) as record_count,\n  AVG(value) as avg_value,\n  MAX(value) as max_value,\n  MIN(value) as min_value,\n  SUM(CASE WHEN value < 7.0 THEN 1 ELSE 0 END) as target_count\nFROM tbl_glucose_records\nWHERE user_id = ?\n  AND measured_at >= today_start\n  AND measured_at <= now
+activate DB
+DB --> Backend: 统计结果
+deactivate DB
+
+Backend -> Backend: 计算达标率\ntargetRate = (target_count / record_count) × 100
+
+Backend --> API: GlucoseStatisticsResponse\n{\n  "period": "today",\n  "recordCount": 5,\n  "averageValue": 6.7,\n  "maxValue": 8.0,\n  "minValue": 5.5,\n  "targetRate": 80.0,\n  "targetValue": 7.0\n}
+deactivate Backend
+
+API --> Manager: GlucoseStatistics
+deactivate API
+
+Manager --> UI: 统计数据
+deactivate Manager
+
+UI -> User: 显示统计卡片\n- 平均值: 6.7\n- 最高值: 8.0\n- 最低值: 5.5\n- 达标率: 80%
+deactivate UI
+
+== 切换统计周期流程 ==
+
+User -> UI: 选择"近7天"
+activate UI
+
+UI -> Manager: getStatistics(period=LAST_7_DAYS, targetValue=7.0)
+activate Manager
+
+Manager -> API: GET /api/v1/glucose/statistics?period=last7days&targetValue=7.0
+activate API
+
+API -> Backend: HTTP GET
+activate Backend
+
+Backend -> Backend: 计算时间范围\n(当前时间 - 7天)
+
+Backend -> DB: SELECT ... \nWHERE user_id = ?\n  AND measured_at >= (now - 7 days)\n  AND measured_at <= now
+activate DB
+DB --> Backend: 近7天统计结果
+deactivate DB
+
+Backend -> Backend: 计算统计指标
+
+Backend --> API: GlucoseStatisticsResponse\n{\n  "period": "last7days",\n  "recordCount": 21,\n  "averageValue": 6.8,\n  ...\n}
+deactivate Backend
+
+API --> Manager: GlucoseStatistics
+deactivate API
+
+Manager --> UI: 统计数据
+deactivate Manager
+
+UI -> User: 更新统计展示\n(近7天数据)
+deactivate UI
+
+== 无数据处理流程 ==
+
+User -> UI: 选择"近30天"
+activate UI
+
+UI -> Manager: getStatistics(period=LAST_30_DAYS, targetValue=7.0)
+activate Manager
+
+Manager -> API: GET /api/v1/glucose/statistics?period=last30days&targetValue=7.0
+activate API
+
+API -> Backend: HTTP GET
+activate Backend
+
+Backend -> DB: SELECT ... \nWHERE user_id = ?\n  AND measured_at >= (now - 30 days)
+activate DB
+DB --> Backend: 空结果集 (0 条记录)
+deactivate DB
+
+Backend -> Backend: recordCount = 0
+
+Backend --> API: GlucoseStatisticsResponse\n{\n  "period": "last30days",\n  "recordCount": 0,\n  "averageValue": 0,\n  "maxValue": 0,\n  "minValue": 0,\n  "targetRate": 0,\n  "targetValue": 7.0\n}
+deactivate Backend
+
+API --> Manager: GlucoseStatistics (empty)
+deactivate API
+
+Manager --> UI: 统计数据 (recordCount=0)
+deactivate Manager
+
+UI -> User: 显示"暂无数据"提示
+deactivate UI
+
+== 下拉刷新流程 ==
+
+User -> UI: 下拉刷新
+activate UI
+
+UI -> Manager: refreshStatistics(currentPeriod)
+activate Manager
+note right of Manager
+  强制刷新，不使用缓存
+end note
+
+Manager -> API: GET /api/v1/glucose/statistics (带刷新标识)
+activate API
+API -> Backend: HTTP GET
+activate Backend
+Backend -> DB: 查询最新统计
+activate DB
+DB --> Backend: 最新数据
+deactivate DB
+Backend --> API: 最新统计
+deactivate Backend
+API --> Manager: 更新后的统计
+deactivate API
+Manager --> UI: 最新数据
+deactivate Manager
+
+UI -> User: 显示最新统计
+deactivate UI
+
+@enduml

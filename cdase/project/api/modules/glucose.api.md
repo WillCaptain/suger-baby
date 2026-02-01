@@ -1,9 +1,10 @@
 # Glucose Management Module API Registry
 
 > **Domain**: 血糖数据记录与统计  
-> **Status**: Proposed  
+> **Status**: Design In Progress  
 > **Owner**: hangxiao  
-> **Last Updated**: 2026-01-29
+> **Last Updated**: 2026-01-31
+> **Related Features**: FTR-003, FTR-004
 
 ---
 
@@ -11,13 +12,35 @@
 
 ### POST /api/v1/glucose/records
 - **描述**: 创建血糖记录，支持手动录入和数字人引导录入
-- **参数**: `CreateGlucoseRecordRequest { userId: string, glucoseValue: decimal, measurementType: string, measurementTime?: datetime, notes?: string, sessionId?: string }`
-- **返回**: `GlucoseRecordResponse { recordId, userId, glucoseValue, measurementType, measurementTime, ... }`
+- **认证**: Bearer Token 或 X-Guest-Id Header
+- **请求体**: 
+  ```json
+  {
+    "value": 6.5,
+    "measureType": "after_meal",
+    "measuredAt": 1706543210000,
+    "note": "今天吃了甜食"
+  }
+  ```
+- **返回**: 
+  ```json
+  {
+    "id": "uuid",
+    "userId": "GUEST_xxx 或正式用户ID",
+    "value": 6.5,
+    "measureType": "after_meal",
+    "measuredAt": 1706543210000,
+    "note": "今天吃了甜食",
+    "createdAt": 1706543215000,
+    "updatedAt": 1706543215000
+  }
+  ```
 - **异常**: 
-  - `400` - 血糖值超出有效范围 (1.0 - 33.3 mmol/L)
-  - `404` - 用户不存在
-- **状态**: Proposed
-- **关联场景**: SCN-002, SCN-004
+  - `400 BadRequest` - 血糖值超出有效范围 (1.0 - 33.3 mmol/L)
+  - `401 Unauthorized` - 未授权
+  - `500 InternalServerError` - 系统错误
+- **状态**: Design In Progress
+- **关联**: FTR-003 (FUN-005), SCN-002, SCN-004
 
 ---
 
@@ -34,12 +57,25 @@
 
 ### GET /api/v1/glucose/records
 - **描述**: 获取用户血糖记录列表（分页）
-- **参数**: `userId: string, startDate?: date, endDate?: date, page: int = 0, size: int = 20`
-- **返回**: `PageResponse<GlucoseRecordResponse> { content[], totalElements, totalPages, ... }`
+- **认证**: Bearer Token 或 X-Guest-Id Header
+- **查询参数**: 
+  - `page` (int): 页码，默认 1
+  - `pageSize` (int): 每页条数，默认 20
+  - `startDate` (date): 开始日期（可选）
+  - `endDate` (date): 结束日期（可选）
+- **返回**: 
+  ```json
+  {
+    "records": [...],
+    "total": 100,
+    "page": 1,
+    "pageSize": 20
+  }
+  ```
 - **异常**: 
-  - `404` - 用户不存在
-- **状态**: Proposed
-- **关联场景**: SCN-002, SCN-007, SCN-008
+  - `401 Unauthorized` - 未授权
+- **状态**: Design In Progress
+- **关联**: FTR-003 (FUN-006, FUN-007), SCN-002, SCN-007, SCN-008
 
 ---
 
@@ -56,24 +92,46 @@
 
 ### GET /api/v1/glucose/statistics
 - **描述**: 获取血糖统计信息（平均值、最高值、最低值、达标率等）
-- **参数**: `userId: string, startDate?: date, endDate?: date`
-- **返回**: `GlucoseStatisticsResponse { averageValue, maxValue, minValue, targetAchievementRate, recordCount, ... }`
+- **认证**: Bearer Token 或 X-Guest-Id Header
+- **查询参数**: 
+  - `period` (enum): 统计周期（today/last7days/last30days），默认 today
+  - `targetValue` (float): 达标目标值（mmol/L），默认 7.0
+- **返回**: 
+  ```json
+  {
+    "period": "last7days",
+    "recordCount": 21,
+    "averageValue": 6.8,
+    "maxValue": 9.2,
+    "minValue": 4.5,
+    "targetRate": 85.7,
+    "targetValue": 7.0
+  }
+  ```
 - **异常**: 
-  - `404` - 用户不存在
-- **状态**: Proposed
-- **关联场景**: SCN-002
+  - `401 Unauthorized` - 未授权
+  - `500 InternalServerError` - 系统错误
+- **状态**: Design In Progress
+- **关联**: FTR-004 (FUN-010), SCN-002
 
 ---
 
-### DELETE /api/v1/glucose/records/{recordId}
+### DELETE /api/v1/glucose/records/{id}
 - **描述**: 删除血糖记录
-- **参数**: `recordId: string`
-- **返回**: `void`
+- **认证**: Bearer Token 或 X-Guest-Id Header
+- **路径参数**: `id` (UUID): 记录ID
+- **返回**: 
+  ```json
+  {
+    "success": true
+  }
+  ```
 - **异常**: 
-  - `404` - 记录不存在
-  - `403` - 无权删除（不是记录所有者）
-- **状态**: Proposed
-- **关联场景**: SCN-002
+  - `404 NotFound` - 记录不存在
+  - `403 Forbidden` - 无权删除他人记录
+  - `401 Unauthorized` - 未授权
+- **状态**: Design In Progress
+- **关联**: FTR-003 (FUN-008), SCN-002
 
 ---
 

@@ -1,0 +1,162 @@
+@startuml
+title FTR-004 血糖数据统计与展示 - Class Diagram
+
+package "Presentation Layer (UI)" {
+  class GlucoseStatisticsScreen {
+    - statisticsManager: GlucoseStatisticsManager
+    - selectedPeriod: StatisticsPeriod = TODAY
+    - targetValue: Float = 7.0
+    
+    + onPeriodChange(period: StatisticsPeriod)
+    + onRefresh()
+    - loadStatistics()
+    - displayStatistics(statistics: GlucoseStatistics)
+    - showEmptyState()
+  }
+  
+  class StatisticsCard {
+    + title: String
+    + value: String
+    + unit: String
+    + icon: Icon
+    + color: Color
+  }
+  
+  note right of StatisticsCard
+    展示单个统计指标卡片
+    如：平均值、最高值等
+  end note
+}
+
+package "Domain Layer (Business Logic)" {
+  class GlucoseStatisticsManager {
+    - api: GlucoseAPI
+    - cache: StatisticsCache
+    
+    + getStatistics(period: StatisticsPeriod, targetValue: Float): Result<GlucoseStatistics>
+    + refreshStatistics(period: StatisticsPeriod, targetValue: Float): Result<GlucoseStatistics>
+    - calculateTargetRate(statistics: GlucoseStatistics): Float
+    - isCacheValid(period: StatisticsPeriod): Boolean
+  }
+  
+  class StatisticsCache {
+    - cachedData: Map<StatisticsPeriod, GlucoseStatistics>
+    - cacheTimestamp: Map<StatisticsPeriod, Long>
+    - CACHE_EXPIRY_MS: Long = 300000 // 5 minutes
+    
+    + get(period: StatisticsPeriod): GlucoseStatistics?
+    + put(period: StatisticsPeriod, statistics: GlucoseStatistics)
+    + clear()
+    + isExpired(period: StatisticsPeriod): Boolean
+  }
+  
+  note right of StatisticsCache
+    缓存统计数据 5 分钟
+    减少 API 调用频率
+  end note
+}
+
+package "Data Layer (API)" {
+  interface GlucoseAPI <<FUN-010>> {
+    + getStatistics(period: StatisticsPeriod, targetValue: Float): GlucoseStatistics
+  }
+  
+  class GlucoseAPIImpl {
+    - httpClient: HttpClient
+    - baseUrl: String
+    + getStatistics(...): GlucoseStatistics
+  }
+}
+
+package "Data Models" {
+  class GlucoseStatistics <<DTO>> {
+    + period: StatisticsPeriod
+    + recordCount: Int
+    + averageValue: Float
+    + maxValue: Float
+    + minValue: Float
+    + targetRate: Float
+    + targetValue: Float
+    
+    + isEmpty(): Boolean
+    + getAverageValueFormatted(): String
+  }
+  
+  enum StatisticsPeriod {
+    TODAY
+    LAST_7_DAYS
+    LAST_30_DAYS
+    
+    + getDisplayName(): String
+    + getStartTimestamp(): Long
+  }
+  
+  note right of StatisticsPeriod
+    TODAY: 今天 00:00 至当前
+    LAST_7_DAYS: 往前推 7×24 小时
+    LAST_30_DAYS: 往前推 30×24 小时
+  end note
+}
+
+package "Backend (External)" {
+  interface "REST API" as RestAPI {
+    GET /api/v1/glucose/statistics?period=xxx&targetValue=xxx
+  }
+  
+  class StatisticsCalculator <<Backend Service>> {
+    + calculateStatistics(userId: String, period: StatisticsPeriod, targetValue: Float): GlucoseStatistics
+    - queryRecords(userId: String, startTime: Long, endTime: Long): List<GlucoseRecord>
+    - computeAverage(records: List<GlucoseRecord>): Float
+    - computeMax(records: List<GlucoseRecord>): Float
+    - computeMin(records: List<GlucoseRecord>): Float
+    - computeTargetRate(records: List<GlucoseRecord>, targetValue: Float): Float
+  }
+  
+  database "PostgreSQL" as DB {
+    table tbl_glucose_records {
+      聚合查询:
+      COUNT(*) as record_count
+      AVG(value) as avg_value
+      MAX(value) as max_value
+      MIN(value) as min_value
+      --
+      筛选条件:
+      WHERE user_id = ?
+      AND measured_at BETWEEN ? AND ?
+    }
+  }
+}
+
+' Relationships
+GlucoseStatisticsScreen --> GlucoseStatisticsManager : uses
+GlucoseStatisticsScreen ..> StatisticsCard : displays multiple
+
+GlucoseStatisticsManager --> GlucoseAPI : uses
+GlucoseStatisticsManager --> StatisticsCache : uses
+GlucoseStatisticsManager ..> GlucoseStatistics : manages
+
+GlucoseAPI <|.. GlucoseAPIImpl : implements
+GlucoseAPIImpl --> RestAPI : HTTP calls
+
+GlucoseStatistics "1" --> "1" StatisticsPeriod : has
+StatisticsCache "1" *-- "many" GlucoseStatistics : caches
+
+RestAPI --> StatisticsCalculator : delegates to
+StatisticsCalculator --> DB : queries
+
+note "FUN-009: 选择统计周期\n用户选择时间范围" as N1
+GlucoseStatisticsScreen .. N1
+
+note "FUN-010: 获取统计数据\nGET /api/v1/glucose/statistics" as N2
+GlucoseAPIImpl .. N2
+
+note "FUN-011: 展示统计卡片\n显示平均值、最高值等" as N3
+StatisticsCard .. N3
+
+note "FUN-012: 计算达标率\n(count < targetValue) / total × 100" as N4
+StatisticsCalculator .. N4
+
+note "统计计算规则:\n- 平均值: AVG(value)\n- 最高值: MAX(value)\n- 最低值: MIN(value)\n- 达标率: COUNT(value < target) / COUNT(*)" as N5
+StatisticsCalculator .. N5
+
+@enduml

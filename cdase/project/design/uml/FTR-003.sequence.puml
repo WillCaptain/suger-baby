@@ -1,0 +1,145 @@
+@startuml
+title FTR-003 血糖记录管理 - Sequence Diagram
+
+actor User as "用户"
+participant UI as "血糖记录\n界面"
+participant Validator as "GlucoseValidator\n(FUN-004)"
+participant Manager as "GlucoseRecordManager"
+participant API as "GlucoseAPI\n(FUN-005)"
+participant Backend as "后端服务"
+database DB as "数据库"
+
+== 创建血糖记录流程 ==
+
+User -> UI: 点击"记录血糖"
+activate UI
+
+UI -> UI: 显示录入表单
+User -> UI: 输入血糖值 (6.5)
+User -> UI: 选择测量类型 (餐后)
+User -> UI: 可选添加备注
+User -> UI: 点击"保存"
+
+UI -> Validator: validateGlucoseValue(6.5)
+activate Validator
+Validator -> Validator: 检查范围 [1.0, 33.3]
+alt 血糖值有效
+    Validator --> UI: ValidationResult(isValid=true)
+else 血糖值无效
+    Validator --> UI: ValidationResult(isValid=false, errorMessage)
+    UI -> User: 显示错误提示
+    deactivate Validator
+    deactivate UI
+end
+
+UI -> Manager: createRecord(request)
+activate Manager
+
+Manager -> API: POST /api/v1/glucose/records
+activate API
+note right of API
+  Request Body:
+  {
+    "value": 6.5,
+    "measureType": "after_meal",
+    "measuredAt": timestamp,
+    "note": "备注"
+  }
+  
+  Headers:
+  Authorization: Bearer <token>
+  或 X-Guest-Id: <guestId>
+end note
+
+API -> Backend: HTTP POST
+activate Backend
+
+Backend -> Backend: 验证用户身份
+Backend -> Backend: 验证血糖值范围
+Backend -> Backend: 生成记录 ID (UUID)
+Backend -> Backend: 关联用户 ID
+
+Backend -> DB: INSERT INTO tbl_glucose_records
+activate DB
+DB --> Backend: 插入成功
+deactivate DB
+
+Backend --> API: GlucoseRecordResponse
+deactivate Backend
+
+API --> Manager: GlucoseRecord
+deactivate API
+
+Manager --> UI: 创建成功
+deactivate Manager
+
+UI -> User: 显示成功提示\n更新记录列表
+deactivate UI
+
+== 查询血糖记录流程 ==
+
+User -> UI: 进入"血糖管理"页面
+activate UI
+
+UI -> Manager: getRecords(page, pageSize)
+activate Manager
+
+Manager -> API: GET /api/v1/glucose/records?page=1&pageSize=20
+activate API
+
+API -> Backend: HTTP GET
+activate Backend
+
+Backend -> DB: SELECT * FROM tbl_glucose_records\nWHERE user_id = ?\nORDER BY measured_at DESC\nLIMIT 20 OFFSET 0
+activate DB
+DB --> Backend: 返回记录列表
+deactivate DB
+
+Backend --> API: GlucoseRecordListResponse
+deactivate Backend
+
+API --> Manager: List<GlucoseRecord>
+deactivate API
+
+Manager --> UI: 记录列表
+deactivate Manager
+
+UI -> User: 显示记录列表\n(按时间倒序)
+deactivate UI
+
+== 删除血糖记录流程 ==
+
+User -> UI: 长按记录，选择删除
+activate UI
+
+UI -> User: 确认删除对话框
+User -> UI: 确认删除
+
+UI -> Manager: deleteRecord(recordId)
+activate Manager
+
+Manager -> API: DELETE /api/v1/glucose/records/{id}
+activate API
+
+API -> Backend: HTTP DELETE
+activate Backend
+
+Backend -> Backend: 验证记录所有权
+Backend -> DB: DELETE FROM tbl_glucose_records\nWHERE id = ? AND user_id = ?
+activate DB
+DB --> Backend: 删除成功
+deactivate DB
+
+Backend --> API: DeleteResponse(success=true)
+deactivate Backend
+
+API --> Manager: 删除成功
+deactivate API
+
+Manager --> UI: 删除成功
+deactivate Manager
+
+UI -> User: 更新列表，显示提示
+deactivate UI
+
+@enduml

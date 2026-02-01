@@ -11,13 +11,13 @@
 
 ## Scenarios
 
-| Scenario ID | Description | Status | Owner | Phase |
-| ----------- | ----------- | ------ | ----- | ----- |
+| Scenario ID | Description | Status | Owner    | Phase |
+| ----------- | ----------- | ------ |----------| ----- |
 | SCN-001 | 访客快速体验 | **In Progress** | hangxiao | 第一阶段（2周） |
-| SCN-002 | 血糖记录与展示 | Draft | **Will** | 第一阶段（2周） |
-| SCN-003 | 个人信息与病例管理 | Draft | hangxiao | 第一阶段（2周） |
-| SCN-004 | 数字人智能对话与引导 | Draft | hangxiao | 第二阶段（3周） |
-| SCN-005 | 饮食拍照识别与记录 | Draft | hangxiao | 第三阶段（3周） |
+| SCN-002 | 血糖记录与展示 | Draft | hangxiao | 第一阶段（2周） |
+| SCN-003 | 个人信息与病例管理 | Draft | Ronny    | 第一阶段（2周） |
+| SCN-004 | 数字人智能对话与引导 | Draft | Ronny    | 第二阶段（3周） |
+| SCN-005 | 饮食拍照识别与记录 | Draft | Ronny    | 第三阶段（3周） |
 | SCN-006 | 运动记录与消耗计算 | Draft | hangxiao | 第三阶段（3周） |
 | SCN-007 | 首页健康数据聚合展示 | Draft | hangxiao | 第三阶段（3周） |
 | SCN-008 | 数字人健康问诊 | Draft | hangxiao | 第四阶段（2周） |
